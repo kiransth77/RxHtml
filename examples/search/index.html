@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>RxHtmx Search with Autocomplete</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="../../dist/rxhtmx.browser.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+            }
+
+            .search-container {
+                position: relative;
+                margin-bottom: 30px;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 15px 20px;
+                font-size: 18px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                outline: none;
+                transition: border-color 0.3s;
+            }
+
+            .search-input:focus {
+                border-color: #007bff;
+            }
+
+            .search-input.loading {
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="%23007bff" stroke-width="2" stroke-dasharray="12 4" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 10 10;360 10 10" dur="1s" repeatCount="indefinite"/></circle></svg>');
+                background-repeat: no-repeat;
+                background-position: right 15px center;
+                background-size: 20px;
+            }
+
+            .suggestions {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #ddd;
+                border-top: none;
+                border-radius: 0 0 8px 8px;
+                max-height: 300px;
+                overflow-y: auto;
+                z-index: 1000;
+                display: none;
+            }
+
+            .suggestions.show {
+                display: block;
+            }
+
+            .suggestion {
+                padding: 12px 20px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                transition: background-color 0.2s;
+            }
+
+            .suggestion:hover {
+                background-color: #f8f9fa;
+            }
+
+            .suggestion:last-child {
+                border-bottom: none;
+            }
+
+            .suggestion-title {
+                font-weight: bold;
+                color: #333;
+            }
+
+            .suggestion-description {
+                font-size: 14px;
+                color: #666;
+                margin-top: 4px;
+            }
+
+            .search-stats {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+            }
+
+            .results-container {
+                margin-top: 20px;
+            }
+
+            .result-item {
+                padding: 20px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .result-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .result-title {
+                font-size: 20px;
+                font-weight: bold;
+                color: #007bff;
+                margin-bottom: 10px;
+            }
+
+            .result-description {
+                color: #666;
+                line-height: 1.6;
+            }
+
+            .no-results {
+                text-align: center;
+                padding: 40px;
+                color: #666;
+                font-style: italic;
+            }
+
+            .error-message {
+                background-color: #f8d7da;
+                color: #721c24;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Reactive Search with Autocomplete</h1>
+
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input"
+                placeholder="Search for programming topics, frameworks, or languages..." autocomplete="off">
+            <div id="suggestions" class="suggestions"></div>
+        </div>
+
+        <div class="search-stats">
+            <div id="search-info">Start typing to search...</div>
+            <div id="search-time"></div>
+        </div>
+
+        <div id="search-results" class="results-container"></div>
+
+                <script type="module">
+                // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
+                function signal(initialValue) {
+                    let _value = initialValue;
+                    const subscribers = new Set();
+                    return {
+                        get value() { return _value; },
+                        set value(v) {
+                            if (_value !== v) {
+                                _value = v;
+                                subscribers.forEach(fn => fn(_value));
+                            }
+                        },
+                        subscribe(fn) {
+                            subscribers.add(fn);
+                            fn(_value);
+                            return () => subscribers.delete(fn);
+                        }
+                    };
+                }
+
+                // --- Mock data and API ---
+                const mockData = [
+                    { id: 1, title: "JavaScript", description: "High-level programming language for web development", category: "language" },
+                    { id: 2, title: "React", description: "JavaScript library for building user interfaces", category: "framework" },
+                    { id: 3, title: "Vue.js", description: "Progressive JavaScript framework", category: "framework" },
+                    { id: 4, title: "Angular", description: "Platform for building mobile and desktop web applications", category: "framework" },
+                    { id: 5, title: "Node.js", description: "JavaScript runtime built on Chrome's V8 JavaScript engine", category: "runtime" },
+                    { id: 6, title: "Python", description: "High-level programming language with simple syntax", category: "language" },
+                    { id: 7, title: "Django", description: "High-level Python web framework", category: "framework" },
+                    { id: 8, title: "Flask", description: "Micro web framework written in Python", category: "framework" },
+                    { id: 9, title: "TypeScript", description: "Typed superset of JavaScript", category: "language" },
+                    { id: 10, title: "RxJS", description: "Reactive Extensions for JavaScript", category: "library" },
+                    { id: 11, title: "HTMX", description: "Library for building dynamic web applications", category: "library" },
+                    { id: 12, title: "Svelte", description: "Cybernetically enhanced web apps", category: "framework" },
+                ];
+
+                function searchAPI(query) {
+                    return new Promise((resolve) => {
+                        const startTime = Date.now();
+                        setTimeout(() => {
+                            const results = mockData.filter(item =>
+                                item.title.toLowerCase().includes(query.toLowerCase()) ||
+                                item.description.toLowerCase().includes(query.toLowerCase())
+                            );
+                            const endTime = Date.now();
+                            const searchTime = endTime - startTime;
+                            resolve({ results, searchTime, query });
+                        }, Math.random() * 300 + 100);
+                    });
+                }
+
+                function getSuggestions(query) {
+                    if (!query || query.length < 2) return { suggestions: [], query };
+                    const suggestions = mockData
+                        .filter(item => item.title.toLowerCase().includes(query.toLowerCase()))
+                        .slice(0, 5);
+                    return { suggestions, query };
+                }
+
+                // --- Signals for search ---
+                const searchInputSignal = createStream('#search-input');
+                const suggestionsSignal = signal({ suggestions: [], query: '' });
+                const resultsSignal = signal({ results: [], searchTime: 0, query: '', error: null });
+
+                // Watch input and update suggestions/results
+                let lastSearchTimeout = null;
+                searchInputSignal.subscribe(query => {
+                    // Show loading state
+                    const input = document.getElementById('search-input');
+                    if (query.length >= 2) {
+                        input.classList.add('loading');
+                    } else {
+                        input.classList.remove('loading');
+                        suggestionsSignal.value = { suggestions: [], query };
+                        resultsSignal.value = { results: [], searchTime: 0, query: '', error: null };
+                        document.getElementById('search-info').textContent = 'Start typing to search...';
+                        document.getElementById('search-time').textContent = '';
+                        document.getElementById('suggestions').classList.remove('show');
+                        return;
+                    }
+                    // Debounce
+                    if (lastSearchTimeout) clearTimeout(lastSearchTimeout);
+                    lastSearchTimeout = setTimeout(() => {
+                        suggestionsSignal.value = getSuggestions(query);
+                        searchAPI(query).then(data => {
+                            resultsSignal.value = data;
+                            input.classList.remove('loading');
+                        }).catch(error => {
+                            resultsSignal.value = { results: [], searchTime: 0, query, error: 'Search failed. Please try again.' };
+                            input.classList.remove('loading');
+                        });
+                    }, 300);
+                });
+
+                // Bind suggestions to UI
+                bindSignalToDom(suggestionsSignal, '#suggestions', (container, data) => {
+                    if (data.suggestions.length === 0 || !data.query) {
+                        container.classList.remove('show');
+                        return;
+                    }
+                    const suggestionsHTML = data.suggestions.map(item => `
+                        <div class="suggestion" data-title="${item.title}">
+                                <div class="suggestion-title">${item.title}</div>
+                                <div class="suggestion-description">${item.description}</div>
+                        </div>
+                    `).join('');
+                    container.innerHTML = suggestionsHTML;
+                    container.classList.add('show');
+                });
+
+                // Bind search results to UI
+                bindSignalToDom(resultsSignal, '#search-results', (container, data) => {
+                    if (data.error) {
+                        container.innerHTML = `<div class="error-message">${data.error}</div>`;
+                        return;
+                    }
+                    if (data.results.length === 0 && data.query) {
+                        container.innerHTML = `
+                            <div class="no-results">
+                                    No results found for "${data.query}". Try a different search term.
+                            </div>
+                        `;
+                        return;
+                    }
+                    const resultsHTML = data.results.map(item => `
+                        <div class="result-item">
+                                <div class="result-title">${item.title}</div>
+                                <div class="result-description">${item.description}</div>
+                        </div>
+                    `).join('');
+                    container.innerHTML = resultsHTML;
+                });
+
+                // Bind search info
+                bindSignalToDom(resultsSignal, '#search-info', (element, data) => {
+                    if (data.error) {
+                        element.textContent = 'Search failed';
+                        return;
+                    }
+                    const count = data.results.length;
+                    if (data.query) {
+                        element.textContent = `Found ${count} result${count !== 1 ? 's' : ''} for "${data.query}"`;
+                    } else {
+                        element.textContent = 'Start typing to search...';
+                    }
+                });
+
+                // Bind search time
+                bindSignalToDom(resultsSignal, '#search-time', (element, data) => {
+                    if (data.searchTime) {
+                        element.textContent = `Search took ${data.searchTime}ms`;
+                    } else {
+                        element.textContent = '';
+                    }
+                });
+
+                // Handle suggestion clicks
+                document.addEventListener('click', (e) => {
+                    const suggestion = e.target.closest('.suggestion');
+                    if (suggestion) {
+                        const title = suggestion.dataset.title;
+                        const input = document.getElementById('search-input');
+                        input.value = title;
+                        input.dispatchEvent(new Event('input'));
+                        document.getElementById('suggestions').classList.remove('show');
+                    }
+                });
+
+                // Hide suggestions when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        document.getElementById('suggestions').classList.remove('show');
+                    }
+                });
+
+                // Show suggestions when input is focused and has content
+                document.getElementById('search-input').addEventListener('focus', () => {
+                    const input = document.getElementById('search-input');
+                    if (input.value.length >= 2) {
+                        const suggestions = document.getElementById('suggestions');
+                        if (suggestions.children.length > 0) {
+                            suggestions.classList.add('show');
+                        }
+                    }
+                });
+
+                console.log('RxHtmx Search Example (signals) loaded!');
+                </script>
+    </body>
+
+</html>

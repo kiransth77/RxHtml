@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>RxHtmx Real-time Chat</title>
+        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+        <script src="../../dist/rxhtmx.browser.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            /* ...existing CSS... */
+        </style>
+
+        <!-- All chat logic below: signals + mock API -->
+        </head>
+        <body>
+        ...existing code...
+        <script type="module">
+        // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
+        function signal(initialValue) {
+            let _value = initialValue;
+            const subscribers = new Set();
+            return {
+                get value() { return _value; },
+                set value(v) {
+                    if (_value !== v) {
+                        _value = v;
+                        subscribers.forEach(fn => fn(_value));
+                    }
+                },
+                subscribe(fn) {
+                    subscribers.add(fn);
+                    fn(_value);
+                    return () => subscribers.delete(fn);
+                }
+            };
+        }
+
+        // --- Mock backend API ---
+        const mockApi = {
+            messages: [
+                { id: 1, user: 'Bob', text: 'Hey everyone! Welcome to the RxHtmx chat demo!', timestamp: Date.now() - 60000 },
+                { id: 2, user: 'Charlie', text: 'This is pretty cool! Real-time reactive programming in action 🚀', timestamp: Date.now() - 30000 }
+            ],
+            users: ['Alice', 'Bob', 'Charlie'],
+            fetchMessages() {
+                return Promise.resolve([...this.messages]);
+            },
+            sendMessage(msg) {
+                const newMsg = { ...msg, id: Date.now(), timestamp: Date.now() };
+                this.messages.push(newMsg);
+                return Promise.resolve(newMsg);
+            },
+        };
+
+        // --- Signal-based chat state ---
+        const currentUser = signal('Alice');
+        const messages = signal([]);
+        const typingUsers = signal(new Set());
+        const onlineUsers = signal(new Set(mockApi.users));
+
+        // Load initial messages from mock API
+        mockApi.fetchMessages().then(msgs => {
+            messages.value = msgs.map(m => ({ ...m, own: m.user === currentUser.value }));
+        });
+
+        // Message input signal
+        const messageInputValue = createStream('#message-input');
+
+        // Typing detection
+        let typingTimeoutId = null;
+        messageInputValue.subscribe(value => {
+            const user = currentUser.value;
+            const current = new Set(typingUsers.value);
+            if (value.length > 0) {
+                current.add(user);
+                typingUsers.value = current;
+                if (typingTimeoutId) clearTimeout(typingTimeoutId);
+                typingTimeoutId = setTimeout(() => {
+                    const t = new Set(typingUsers.value);
+                    t.delete(user);
+                    typingUsers.value = t;
+                }, 3000);
+            } else {
+                current.delete(user);
+                typingUsers.value = current;
+            }
+        });
+
+        // Simulate other users typing
+        setInterval(() => {
+            const users = mockApi.users.filter(u => u !== currentUser.value);
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            if (Math.random() > 0.7) {
+                const current = new Set(typingUsers.value);
+                current.add(randomUser);
+                typingUsers.value = current;
+                setTimeout(() => {
+                    const updated = new Set(typingUsers.value);
+                    updated.delete(randomUser);
+                    typingUsers.value = updated;
+                }, 2000);
+            }
+        }, 5000);
+
+        // Send message
+        function sendMessage(text) {
+            if (!text.trim()) return;
+            const msg = {
+                user: currentUser.value,
+                text: text.trim(),
+                own: true
+            };
+            mockApi.sendMessage(msg).then(newMsg => {
+                messages.value = [...messages.value, { ...newMsg, own: true }];
+                // Simulate response
+                setTimeout(() => simulateResponse(text), 1000 + Math.random() * 2000);
+            });
+            document.getElementById('message-input').value = '';
+            messageInputValue.value = '';
+            // Remove typing
+            const t = new Set(typingUsers.value);
+            t.delete(currentUser.value);
+            typingUsers.value = t;
+        }
+
+        // Simulate responses from other users
+        function simulateResponse(originalMessage) {
+            const users = mockApi.users.filter(u => u !== currentUser.value);
+            if (Math.random() > 0.3) {
+                const responseUser = users[Math.floor(Math.random() * users.length)];
+                const responses = [
+                    "That's interesting!",
+                    "I agree!",
+                    "Tell me more about that",
+                    "Good point!",
+                    "I was thinking the same thing",
+                    "Thanks for sharing!",
+                    "LOL 😄",
+                    "Really? That's cool!",
+                    "I hadn't thought of that",
+                    "Nice!"
+                ];
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                const responseMessage = {
+                    id: Date.now() + Math.random(),
+                    user: responseUser,
+                    text: response,
+                    timestamp: Date.now(),
+                    own: false
+                };
+                messages.value = [...messages.value, responseMessage];
+            }
+        }
+
+        // User selection handling
+        const userButtons = document.querySelectorAll('.user-button');
+        userButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const user = button.dataset.user;
+                currentUser.value = user;
+                userButtons.forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                // Update messages to reflect ownership
+                messages.value = messages.value.map(msg => ({ ...msg, own: msg.user === user }));
+            });
+        });
+
+        // Bind messages to UI
+        bindSignalToDom(messages, '#messages', (container, messageList) => {
+            const messagesHTML = messageList.map(msg => `
+                <div class="message ${msg.own ? 'own' : 'other'}">
+                        <div class="message-bubble">
+                                ${msg.text}
+                        </div>
+                        <div class="message-info">
+                                ${msg.user} • ${new Date(msg.timestamp).toLocaleTimeString()}
+                        </div>
+                </div>
+            `).join('');
+            container.innerHTML = messagesHTML;
+            container.scrollTop = container.scrollHeight;
+        });
+
+        // Bind typing indicator
+        bindSignalToDom(typingUsers, '#typing-indicator', (element, typing) => {
+            const currentUserName = currentUser.value;
+            const otherTyping = Array.from(typing).filter(user => user !== currentUserName);
+            if (otherTyping.length > 0) {
+                const text = otherTyping.length === 1
+                    ? `${otherTyping[0]} is typing...`
+                    : `${otherTyping.slice(0, -1).join(', ')} and ${otherTyping[otherTyping.length - 1]} are typing...`;
+                element.textContent = text;
+                element.classList.add('show');
+            } else {
+                element.classList.remove('show');
+            }
+        });
+
+        // Bind current user display
+        bindSignalToDom(currentUser, '#current-user', (element, user) => {
+            element.textContent = `Current user: ${user}`;
+        });
+
+        // Bind online count
+        bindSignalToDom(onlineUsers, '#online-count', (element, users) => {
+            element.textContent = `${users.size} users online`;
+        });
+
+        // Enable send button only when there's text
+        messageInputValue.subscribe(value => {
+            document.getElementById('send-button').disabled = value.trim().length === 0;
+        });
+
+        // Send message on button click or Enter key
+        document.getElementById('send-button').addEventListener('click', () => {
+            sendMessage(messageInputValue.value);
+        });
+        document.getElementById('message-input').addEventListener('keypress', e => {
+            if (e.key === 'Enter') {
+                sendMessage(messageInputValue.value);
+            }
+        });
+
+        console.log('RxHtmx Chat Example (signals) loaded!');
+        </script>
+    </body>
+
+</html>

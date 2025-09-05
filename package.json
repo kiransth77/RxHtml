@@ -1,0 +1,48 @@
+{
+  "name": "rxhtmx",
+  "version": "1.0.0",
+  "description": "A lightweight frontend framework combining RxJS and HTMX for reactive and server-driven UI updates.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && bun run build:browser",
+    "build:browser": "node scripts/build-browser.js",
+    "serve": "vite preview",
+    "test": "bun test tests/integration.test.js tests/createStream.standalone.test.js tests/htmxSignalIntegration.standalone.test.js",
+    "test:watch": "bun test --watch tests/",
+    "test:coverage": "bun test --coverage",
+    "test:browser": "playwright test",
+    "lint": "eslint src/ tests/ examples/ --ext .js,.html",
+    "lint:fix": "eslint src/ tests/ examples/ --ext .js,.html --fix",
+    "format": "prettier --write 'src/**/*.js' 'tests/**/*.js' 'examples/**/*.html' 'docs/**/*.md'",
+    "format:check": "prettier --check 'src/**/*.js' 'tests/**/*.js' 'examples/**/*.html' 'docs/**/*.md'",
+    "package": "npm pack",
+    "docs:build": "node scripts/build-docs.js",
+    "docs:serve": "python -m http.server 8080 --directory docs-dist",
+    "release": "node scripts/release.js",
+    "preversion": "bun run test && bun run lint",
+    "version": "bun run build && git add dist/",
+    "postversion": "git push && git push --tags"
+  },
+  "dependencies": {
+    "htmx.org": "^1.9.2",
+    "jsdom": "^26.1.0",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "vite": "^4.5.0",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "rollup": "^4.8.0",
+    "terser": "^5.24.0"
+  },
+  "keywords": [
+    "rxjs",
+    "htmx",
+    "frontend-framework",
+    "reactive-programming"
+  ],
+  "author": "",
+  "license": "MIT"
+}

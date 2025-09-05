@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RxHtmx Form Validation Example</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="../../dist/rxhtmx.browser.js"></script>
+    <!-- Tailwind CSS CDN for rapid prototyping -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+
+    <body>
+
+        <h1 class="text-2xl font-bold text-blue-600 mb-6 text-center">Real-time Form Validation with RxHtmx</h1>
+
+        <form id="registration-form" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-6">
+                <label for="username" class="block text-gray-700 font-bold mb-2">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" class="appearance-none border-2 border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500 transition-colors">
+                <div id="username-validation" class="validation-message min-h-[20px] text-sm mt-1"></div>
+            </div>
+
+            <div class="mb-6">
+                <label for="email" class="block text-gray-700 font-bold mb-2">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter email" class="appearance-none border-2 border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500 transition-colors">
+                <div id="email-validation" class="validation-message min-h-[20px] text-sm mt-1"></div>
+            </div>
+
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-bold mb-2">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" class="appearance-none border-2 border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500 transition-colors">
+                <div id="password-validation" class="validation-message min-h-[20px] text-sm mt-1"></div>
+            </div>
+
+            <div class="mb-6">
+                <label for="confirm-password" class="block text-gray-700 font-bold mb-2">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm password" class="appearance-none border-2 border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500 transition-colors">
+                <div id="confirm-password-validation" class="validation-message min-h-[20px] text-sm mt-1"></div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="submit-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed w-full" disabled>
+                Register
+            </button>
+        </form>
+
+        <div class="form-summary bg-gray-100 rounded p-4 mt-6">
+            <h3 class="font-semibold mb-2">Form Status</h3>
+            <div id="form-status" class="mb-1">Please fill out all fields</div>
+            <div id="validation-summary"></div>
+        </div>
+
+                <script type="module">
+                // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
+                function signal(initialValue) {
+                    let _value = initialValue;
+                    const subscribers = new Set();
+                    return {
+                        get value() { return _value; },
+                        set value(v) {
+                            if (_value !== v) {
+                                _value = v;
+                                subscribers.forEach(fn => fn(_value));
+                            }
+                        },
+                        subscribe(fn) {
+                            subscribers.add(fn);
+                            fn(_value);
+                            return () => subscribers.delete(fn);
+                        }
+                    };
+                }
+
+                // --- Mock backend API for username/email check ---
+                const mockApi = {
+                    takenUsernames: ['admin', 'test', 'user'],
+                    takenEmails: ['test@example.com'],
+                    checkUsername(username) {
+                        return new Promise(resolve => setTimeout(() => resolve(!this.takenUsernames.includes(username)), 300));
+                    },
+                    checkEmail(email) {
+                        return new Promise(resolve => setTimeout(() => resolve(!this.takenEmails.includes(email)), 300));
+                    }
+                };
+
+                // Create signals for each input field
+                const usernameSignal = createStream('#username');
+                const emailSignal = createStream('#email');
+                const passwordSignal = createStream('#password');
+                const confirmPasswordSignal = createStream('#confirm-password');
+
+                // Validation signals
+                const usernameValidation = signal({ valid: false, message: '' });
+                const emailValidation = signal({ valid: false, message: '' });
+                const passwordValidation = signal({ valid: false, message: '' });
+                const confirmPasswordValidation = signal({ valid: false, message: '' });
+
+                // Username validation with mock API
+                usernameSignal.subscribe(async username => {
+                    if (!username) {
+                        usernameValidation.value = { valid: false, message: '' };
+                        return;
+                    }
+                    if (username.length < 3) {
+                        usernameValidation.value = { valid: false, message: 'Username must be at least 3 characters' };
+                        return;
+                    }
+                    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                        usernameValidation.value = { valid: false, message: 'Username can only contain letters, numbers, and underscores' };
+                        return;
+                    }
+                    const available = await mockApi.checkUsername(username);
+                    usernameValidation.value = available
+                        ? { valid: true, message: 'Username is available' }
+                        : { valid: false, message: 'Username is already taken' };
+                });
+
+                // Email validation with mock API
+                emailSignal.subscribe(async email => {
+                    if (!email) {
+                        emailValidation.value = { valid: false, message: '' };
+                        return;
+                    }
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        emailValidation.value = { valid: false, message: 'Please enter a valid email address' };
+                        return;
+                    }
+                    const available = await mockApi.checkEmail(email);
+                    emailValidation.value = available
+                        ? { valid: true, message: 'Email is available' }
+                        : { valid: false, message: 'Email is already registered' };
+                });
+
+                // Password validation
+                passwordSignal.subscribe(password => {
+                    if (!password) {
+                        passwordValidation.value = { valid: false, message: '' };
+                        return;
+                    }
+                    if (password.length < 8) {
+                        passwordValidation.value = { valid: false, message: 'Password must be at least 8 characters' };
+                        return;
+                    }
+                    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                        passwordValidation.value = { valid: false, message: 'Password must contain uppercase, lowercase, and number' };
+                        return;
+                    }
+                    passwordValidation.value = { valid: true, message: 'Password is strong' };
+                });
+
+                // Confirm password validation
+                function validateConfirmPassword() {
+                    const password = passwordSignal.value;
+                    const confirmPassword = confirmPasswordSignal.value;
+                    if (!confirmPassword) {
+                        confirmPasswordValidation.value = { valid: false, message: '' };
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        confirmPasswordValidation.value = { valid: false, message: 'Passwords do not match' };
+                        return;
+                    }
+                    confirmPasswordValidation.value = { valid: true, message: 'Passwords match' };
+                }
+                passwordSignal.subscribe(validateConfirmPassword);
+                confirmPasswordSignal.subscribe(validateConfirmPassword);
+
+                // Form-wide validation signal
+                const formValidation = signal({
+                    isValid: false,
+                    validCount: 0,
+                    totalCount: 4,
+                    fields: {
+                        username: { valid: false },
+                        email: { valid: false },
+                        password: { valid: false },
+                        confirmPassword: { valid: false }
+                    }
+                });
+
+                function updateFormValidation() {
+                    const username = usernameValidation.value;
+                    const email = emailValidation.value;
+                    const password = passwordValidation.value;
+                    const confirmPassword = confirmPasswordValidation.value;
+                    const allValid = username.valid && email.valid && password.valid && confirmPassword.valid;
+                    const validCount = [username, email, password, confirmPassword].filter(v => v.valid).length;
+                    formValidation.value = {
+                        isValid: allValid,
+                        validCount,
+                        totalCount: 4,
+                        fields: { username, email, password, confirmPassword }
+                    };
+                }
+                usernameValidation.subscribe(updateFormValidation);
+                emailValidation.subscribe(updateFormValidation);
+                passwordValidation.subscribe(updateFormValidation);
+                confirmPasswordValidation.subscribe(updateFormValidation);
+
+                // Bind validation to UI
+                function bindValidation(sig, inputId, validationId) {
+                    bindSignalToDom(sig, inputId, (input, validation) => {
+                        // Tailwind border color classes
+                        input.classList.remove('border-green-500', 'border-red-500');
+                        if (validation.valid) input.classList.add('border-green-500');
+                        else if (validation.message) input.classList.add('border-red-500');
+                    });
+                    bindSignalToDom(sig, validationId, (div, validation) => {
+                        div.textContent = validation.message;
+                        div.className = `validation-message min-h-[20px] text-sm mt-1 ${validation.valid ? 'text-green-600' : (validation.message ? 'text-red-600' : '')}`;
+                    });
+                }
+                bindValidation(usernameValidation, '#username', '#username-validation');
+                bindValidation(emailValidation, '#email', '#email-validation');
+                bindValidation(passwordValidation, '#password', '#password-validation');
+                bindValidation(confirmPasswordValidation, '#confirm-password', '#confirm-password-validation');
+
+                // Bind form status
+                bindSignalToDom(formValidation, '#submit-btn', (btn, validation) => {
+                    btn.disabled = !validation.isValid;
+                });
+                bindSignalToDom(formValidation, '#form-status', (div, validation) => {
+                    if (validation.isValid) {
+                        div.textContent = 'Form is ready to submit!';
+                        div.style.color = '#28a745';
+                    } else {
+                        div.textContent = `${validation.validCount}/${validation.totalCount} fields valid`;
+                        div.style.color = '#6c757d';
+                    }
+                });
+                bindSignalToDom(formValidation, '#validation-summary', (div, validation) => {
+                    const summary = Object.entries(validation.fields)
+                        .map(([field, data]) => {
+                            const status = data.valid ? '✓' : (data.message ? '✗' : '○');
+                            return `${status} ${field.charAt(0).toUpperCase() + field.slice(1)}`;
+                        })
+                        .join(' | ');
+                    div.textContent = summary;
+                });
+
+                // Handle form submission
+                document.getElementById('registration-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (formValidation.value.isValid) {
+                        alert('Form submitted successfully! (This is just a demo)');
+                    } else {
+                        alert('Please fix all validation errors before submitting.');
+                    }
+                });
+
+                console.log('RxHtmx Form Validation Example (signals) loaded!');
+                </script>
+    </body>
+
+</html>
