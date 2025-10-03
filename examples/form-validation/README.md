@@ -1,76 +1,173 @@
 # Form Validation Example
 
-This example demonstrates real-time form validation using RxHtmx, combining reactive programming with immediate user feedback.
+This example demonstrates building a robust form validation system using the RxHtmx framework, showcasing component architecture, reactive signals, and state management.
 
-## Features
+## Framework Features Demonstrated
 
-- **Real-time validation** as users type
-- **Visual feedback** with color-coded input fields
-- **Debounced input** to avoid excessive validation calls
-- **Complex validation rules** including password strength and confirmation
-- **Form-wide state management** with submit button control
+- **Component-based architecture** with lifecycle hooks
+- **Reactive form validation** using framework signals
+- **State management** with integrated stores
+- **Custom validation components** and reusable patterns
+- **Error boundaries** for graceful error handling
+- **Performance optimization** with selective re-rendering
 
-## Key Concepts Demonstrated
+## Key Components
 
-### 1. Input Streams with Debouncing
-
-```javascript
-const usernameStream = createStream('#username').pipe(
-    debounceTime(300),           // Wait 300ms after user stops typing
-    distinctUntilChanged(),      // Only emit when value actually changes
-    startWith('')                // Start with empty value
-);
-```
-
-### 2. Validation Logic
+### 1. FormValidation Component
 
 ```javascript
-function validatePassword(password) {
-    if (!password) return { valid: false, message: '' };
-    if (password.length < 8) return { valid: false, message: 'Password must be at least 8 characters' };
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-        return { valid: false, message: 'Password must contain uppercase, lowercase, and number' };
-    }
-    return { valid: true, message: 'Password is strong' };
+class FormValidationComponent extends Component {
+  constructor() {
+    super();
+    this.formStore = createStore({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      isValid: false
+    });
+  }
+
+  onMount() {
+    this.setupValidation();
+  }
+
+  setupValidation() {
+    const username$ = this.formStore.select('username');
+    const email$ = this.formStore.select('email');
+    
+    // Reactive validation with debouncing
+    const usernameValidation$ = username$.pipe(
+      debounceTime(300),
+      map(this.validateUsername)
+    );
+  }
 }
 ```
 
-### 3. Cross-field Validation
+### 2. Custom Validation Components
 
 ```javascript
-const confirmPasswordValidation = combineLatest([passwordStream, confirmPasswordStream]).pipe(
-    map(([password, confirmPassword]) => validateConfirmPassword(password, confirmPassword))
+class PasswordStrengthComponent extends Component {
+  render({ password, validation }) {
+    const strengthClass = this.getStrengthClass(validation.score);
+    return `
+      <div class="password-strength ${strengthClass}">
+        <div class="strength-meter"></div>
+        <span class="strength-text">${validation.message}</span>
+      </div>
+    `;
+  }
+}
+```
+
+### 3. Form State Management
+
+```javascript
+// Framework store integration
+const formStore = createStore({
+  fields: {
+    username: { value: '', validation: null },
+    email: { value: '', validation: null },
+    password: { value: '', validation: null }
+  },
+  isSubmitting: false,
+  submitCount: 0
+});
+
+// Reactive selectors
+const isFormValid$ = formStore.select(state => 
+  Object.values(state.fields).every(field => field.validation?.valid)
+);
+```
+## Running the Example
+
+### Development Mode
+```bash
+# Using framework CLI
+rxhtmx dev examples/form-validation
+
+# Or using npm scripts
+npm run dev:examples
+```
+
+### Production Build
+```bash
+rxhtmx build examples/form-validation
+```
+
+### Direct Browser Access
+1. Open `index.html` in a web browser
+2. Experience the component-based validation system
+3. Observe reactive state updates and error boundaries
+4. Test form submission and success handling
+
+## Validation Architecture
+
+### Component Hierarchy
+```
+FormValidationComponent
+├── InputFieldComponent (username)
+├── EmailFieldComponent 
+├── PasswordFieldComponent
+│   └── PasswordStrengthComponent
+├── ConfirmPasswordComponent
+└── SubmitButtonComponent
+```
+
+### Validation Rules
+- **Username**: 3+ characters, alphanumeric + underscores, uniqueness check
+- **Email**: RFC-compliant format validation with domain verification
+- **Password**: 8+ characters, complexity requirements, common password detection
+- **Confirm Password**: Real-time matching with original password
+- **Form-level**: Cross-field validation and business rule checking
+
+## Advanced Framework Features
+
+### 1. Error Boundaries
+```javascript
+class FormErrorBoundary extends ErrorBoundary {
+  handleError(error, errorInfo) {
+    // Track validation errors
+    this.setState({ hasError: true, error });
+    // Send to monitoring service
+    analytics.trackFormError(error, errorInfo);
+  }
+}
+```
+
+### 2. Performance Optimization
+```javascript
+// Selective re-rendering with memo
+const MemoizedPasswordStrength = memo(PasswordStrengthComponent, 
+  (prevProps, nextProps) => prevProps.score === nextProps.score
+);
+
+// Virtual scrolling for large option lists
+const CountrySelectComponent = lazy(() => 
+  import('./CountrySelectWithVirtualScrolling')
 );
 ```
 
-### 4. Reactive UI Updates
-
+### 3. Testing Integration
 ```javascript
-bindSignalToDom(formValidation, '#submit-btn', (btn, validation) => {
-    btn.disabled = !validation.isValid;
+// Framework testing utilities
+describe('Form Validation', () => {
+  test('validates email format', () => {
+    const component = mount(EmailFieldComponent);
+    component.setProps({ value: 'invalid-email' });
+    expect(component.find('.error-message')).toBeVisible();
+  });
 });
 ```
 
-## Running the Example
-
-1. Open `index.html` in a web browser
-2. Start typing in the form fields
-3. Watch the real-time validation feedback
-4. Observe how the submit button becomes enabled only when all fields are valid
-
-## Validation Rules
-
-- **Username**: Minimum 3 characters, alphanumeric and underscores only
-- **Email**: Valid email format
-- **Password**: Minimum 8 characters with uppercase, lowercase, and number
-- **Confirm Password**: Must match the password field
-
 ## Learning Outcomes
 
-- How to create reactive streams from form inputs
-- Implementing debounced validation to improve performance
-- Combining multiple streams for complex validation logic
-- Binding reactive state to DOM elements for immediate UI feedback
-- Managing form-wide state with RxJS operators
+- **Component Architecture**: Building reusable validation components with lifecycle management
+- **Reactive State**: Managing complex form state with framework stores and signals
+- **Performance**: Optimizing validation performance with memoization and selective updates
+- **Error Handling**: Implementing robust error boundaries and user feedback
+- **Testing**: Writing comprehensive tests for validation logic and component behavior
+- **Accessibility**: Creating accessible forms with ARIA attributes and keyboard navigation
 
-This example showcases the power of reactive programming for creating responsive, user-friendly forms with minimal code complexity.
+This example demonstrates how the RxHtmx framework enables building sophisticated, production-ready form systems with excellent developer experience and user interface responsiveness.

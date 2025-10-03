@@ -5,8 +5,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>RxHtmx Search with Autocomplete</title>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <script src="../../dist/rxhtmx.browser.js"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+        <script src="../../dist/rxhtmx.browser.js"></script>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -157,195 +157,195 @@
 
         <div id="search-results" class="results-container"></div>
 
-                <script type="module">
-                // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
-                function signal(initialValue) {
-                    let _value = initialValue;
-                    const subscribers = new Set();
-                    return {
-                        get value() { return _value; },
-                        set value(v) {
-                            if (_value !== v) {
-                                _value = v;
-                                subscribers.forEach(fn => fn(_value));
-                            }
-                        },
-                        subscribe(fn) {
-                            subscribers.add(fn);
-                            fn(_value);
-                            return () => subscribers.delete(fn);
+        <script type="module">
+            // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
+            function signal(initialValue) {
+                let _value = initialValue;
+                const subscribers = new Set();
+                return {
+                    get value() { return _value; },
+                    set value(v) {
+                        if (_value !== v) {
+                            _value = v;
+                            subscribers.forEach(fn => fn(_value));
                         }
-                    };
-                }
-
-                // --- Mock data and API ---
-                const mockData = [
-                    { id: 1, title: "JavaScript", description: "High-level programming language for web development", category: "language" },
-                    { id: 2, title: "React", description: "JavaScript library for building user interfaces", category: "framework" },
-                    { id: 3, title: "Vue.js", description: "Progressive JavaScript framework", category: "framework" },
-                    { id: 4, title: "Angular", description: "Platform for building mobile and desktop web applications", category: "framework" },
-                    { id: 5, title: "Node.js", description: "JavaScript runtime built on Chrome's V8 JavaScript engine", category: "runtime" },
-                    { id: 6, title: "Python", description: "High-level programming language with simple syntax", category: "language" },
-                    { id: 7, title: "Django", description: "High-level Python web framework", category: "framework" },
-                    { id: 8, title: "Flask", description: "Micro web framework written in Python", category: "framework" },
-                    { id: 9, title: "TypeScript", description: "Typed superset of JavaScript", category: "language" },
-                    { id: 10, title: "RxJS", description: "Reactive Extensions for JavaScript", category: "library" },
-                    { id: 11, title: "HTMX", description: "Library for building dynamic web applications", category: "library" },
-                    { id: 12, title: "Svelte", description: "Cybernetically enhanced web apps", category: "framework" },
-                ];
-
-                function searchAPI(query) {
-                    return new Promise((resolve) => {
-                        const startTime = Date.now();
-                        setTimeout(() => {
-                            const results = mockData.filter(item =>
-                                item.title.toLowerCase().includes(query.toLowerCase()) ||
-                                item.description.toLowerCase().includes(query.toLowerCase())
-                            );
-                            const endTime = Date.now();
-                            const searchTime = endTime - startTime;
-                            resolve({ results, searchTime, query });
-                        }, Math.random() * 300 + 100);
-                    });
-                }
-
-                function getSuggestions(query) {
-                    if (!query || query.length < 2) return { suggestions: [], query };
-                    const suggestions = mockData
-                        .filter(item => item.title.toLowerCase().includes(query.toLowerCase()))
-                        .slice(0, 5);
-                    return { suggestions, query };
-                }
-
-                // --- Signals for search ---
-                const searchInputSignal = createStream('#search-input');
-                const suggestionsSignal = signal({ suggestions: [], query: '' });
-                const resultsSignal = signal({ results: [], searchTime: 0, query: '', error: null });
-
-                // Watch input and update suggestions/results
-                let lastSearchTimeout = null;
-                searchInputSignal.subscribe(query => {
-                    // Show loading state
-                    const input = document.getElementById('search-input');
-                    if (query.length >= 2) {
-                        input.classList.add('loading');
-                    } else {
-                        input.classList.remove('loading');
-                        suggestionsSignal.value = { suggestions: [], query };
-                        resultsSignal.value = { results: [], searchTime: 0, query: '', error: null };
-                        document.getElementById('search-info').textContent = 'Start typing to search...';
-                        document.getElementById('search-time').textContent = '';
-                        document.getElementById('suggestions').classList.remove('show');
-                        return;
+                    },
+                    subscribe(fn) {
+                        subscribers.add(fn);
+                        fn(_value);
+                        return () => subscribers.delete(fn);
                     }
-                    // Debounce
-                    if (lastSearchTimeout) clearTimeout(lastSearchTimeout);
-                    lastSearchTimeout = setTimeout(() => {
-                        suggestionsSignal.value = getSuggestions(query);
-                        searchAPI(query).then(data => {
-                            resultsSignal.value = data;
-                            input.classList.remove('loading');
-                        }).catch(error => {
-                            resultsSignal.value = { results: [], searchTime: 0, query, error: 'Search failed. Please try again.' };
-                            input.classList.remove('loading');
-                        });
-                    }, 300);
+                };
+            }
+
+            // --- Mock data and API ---
+            const mockData = [
+                { id: 1, title: "JavaScript", description: "High-level programming language for web development", category: "language" },
+                { id: 2, title: "React", description: "JavaScript library for building user interfaces", category: "framework" },
+                { id: 3, title: "Vue.js", description: "Progressive JavaScript framework", category: "framework" },
+                { id: 4, title: "Angular", description: "Platform for building mobile and desktop web applications", category: "framework" },
+                { id: 5, title: "Node.js", description: "JavaScript runtime built on Chrome's V8 JavaScript engine", category: "runtime" },
+                { id: 6, title: "Python", description: "High-level programming language with simple syntax", category: "language" },
+                { id: 7, title: "Django", description: "High-level Python web framework", category: "framework" },
+                { id: 8, title: "Flask", description: "Micro web framework written in Python", category: "framework" },
+                { id: 9, title: "TypeScript", description: "Typed superset of JavaScript", category: "language" },
+                { id: 10, title: "RxJS", description: "Reactive Extensions for JavaScript", category: "library" },
+                { id: 11, title: "HTMX", description: "Library for building dynamic web applications", category: "library" },
+                { id: 12, title: "Svelte", description: "Cybernetically enhanced web apps", category: "framework" },
+            ];
+
+            function searchAPI(query) {
+                return new Promise((resolve) => {
+                    const startTime = Date.now();
+                    setTimeout(() => {
+                        const results = mockData.filter(item =>
+                            item.title.toLowerCase().includes(query.toLowerCase()) ||
+                            item.description.toLowerCase().includes(query.toLowerCase())
+                        );
+                        const endTime = Date.now();
+                        const searchTime = endTime - startTime;
+                        resolve({ results, searchTime, query });
+                    }, Math.random() * 300 + 100);
                 });
+            }
 
-                // Bind suggestions to UI
-                bindSignalToDom(suggestionsSignal, '#suggestions', (container, data) => {
-                    if (data.suggestions.length === 0 || !data.query) {
-                        container.classList.remove('show');
-                        return;
-                    }
-                    const suggestionsHTML = data.suggestions.map(item => `
+            function getSuggestions(query) {
+                if (!query || query.length < 2) return { suggestions: [], query };
+                const suggestions = mockData
+                    .filter(item => item.title.toLowerCase().includes(query.toLowerCase()))
+                    .slice(0, 5);
+                return { suggestions, query };
+            }
+
+            // --- Signals for search ---
+            const searchInputSignal = createStream('#search-input');
+            const suggestionsSignal = signal({ suggestions: [], query: '' });
+            const resultsSignal = signal({ results: [], searchTime: 0, query: '', error: null });
+
+            // Watch input and update suggestions/results
+            let lastSearchTimeout = null;
+            searchInputSignal.subscribe(query => {
+                // Show loading state
+                const input = document.getElementById('search-input');
+                if (query.length >= 2) {
+                    input.classList.add('loading');
+                } else {
+                    input.classList.remove('loading');
+                    suggestionsSignal.value = { suggestions: [], query };
+                    resultsSignal.value = { results: [], searchTime: 0, query: '', error: null };
+                    document.getElementById('search-info').textContent = 'Start typing to search...';
+                    document.getElementById('search-time').textContent = '';
+                    document.getElementById('suggestions').classList.remove('show');
+                    return;
+                }
+                // Debounce
+                if (lastSearchTimeout) clearTimeout(lastSearchTimeout);
+                lastSearchTimeout = setTimeout(() => {
+                    suggestionsSignal.value = getSuggestions(query);
+                    searchAPI(query).then(data => {
+                        resultsSignal.value = data;
+                        input.classList.remove('loading');
+                    }).catch(error => {
+                        resultsSignal.value = { results: [], searchTime: 0, query, error: 'Search failed. Please try again.' };
+                        input.classList.remove('loading');
+                    });
+                }, 300);
+            });
+
+            // Bind suggestions to UI
+            bindSignalToDom(suggestionsSignal, '#suggestions', (container, data) => {
+                if (data.suggestions.length === 0 || !data.query) {
+                    container.classList.remove('show');
+                    return;
+                }
+                const suggestionsHTML = data.suggestions.map(item => `
                         <div class="suggestion" data-title="${item.title}">
                                 <div class="suggestion-title">${item.title}</div>
                                 <div class="suggestion-description">${item.description}</div>
                         </div>
                     `).join('');
-                    container.innerHTML = suggestionsHTML;
-                    container.classList.add('show');
-                });
+                container.innerHTML = suggestionsHTML;
+                container.classList.add('show');
+            });
 
-                // Bind search results to UI
-                bindSignalToDom(resultsSignal, '#search-results', (container, data) => {
-                    if (data.error) {
-                        container.innerHTML = `<div class="error-message">${data.error}</div>`;
-                        return;
-                    }
-                    if (data.results.length === 0 && data.query) {
-                        container.innerHTML = `
+            // Bind search results to UI
+            bindSignalToDom(resultsSignal, '#search-results', (container, data) => {
+                if (data.error) {
+                    container.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    return;
+                }
+                if (data.results.length === 0 && data.query) {
+                    container.innerHTML = `
                             <div class="no-results">
                                     No results found for "${data.query}". Try a different search term.
                             </div>
                         `;
-                        return;
-                    }
-                    const resultsHTML = data.results.map(item => `
+                    return;
+                }
+                const resultsHTML = data.results.map(item => `
                         <div class="result-item">
                                 <div class="result-title">${item.title}</div>
                                 <div class="result-description">${item.description}</div>
                         </div>
                     `).join('');
-                    container.innerHTML = resultsHTML;
-                });
+                container.innerHTML = resultsHTML;
+            });
 
-                // Bind search info
-                bindSignalToDom(resultsSignal, '#search-info', (element, data) => {
-                    if (data.error) {
-                        element.textContent = 'Search failed';
-                        return;
-                    }
-                    const count = data.results.length;
-                    if (data.query) {
-                        element.textContent = `Found ${count} result${count !== 1 ? 's' : ''} for "${data.query}"`;
-                    } else {
-                        element.textContent = 'Start typing to search...';
-                    }
-                });
+            // Bind search info
+            bindSignalToDom(resultsSignal, '#search-info', (element, data) => {
+                if (data.error) {
+                    element.textContent = 'Search failed';
+                    return;
+                }
+                const count = data.results.length;
+                if (data.query) {
+                    element.textContent = `Found ${count} result${count !== 1 ? 's' : ''} for "${data.query}"`;
+                } else {
+                    element.textContent = 'Start typing to search...';
+                }
+            });
 
-                // Bind search time
-                bindSignalToDom(resultsSignal, '#search-time', (element, data) => {
-                    if (data.searchTime) {
-                        element.textContent = `Search took ${data.searchTime}ms`;
-                    } else {
-                        element.textContent = '';
-                    }
-                });
+            // Bind search time
+            bindSignalToDom(resultsSignal, '#search-time', (element, data) => {
+                if (data.searchTime) {
+                    element.textContent = `Search took ${data.searchTime}ms`;
+                } else {
+                    element.textContent = '';
+                }
+            });
 
-                // Handle suggestion clicks
-                document.addEventListener('click', (e) => {
-                    const suggestion = e.target.closest('.suggestion');
-                    if (suggestion) {
-                        const title = suggestion.dataset.title;
-                        const input = document.getElementById('search-input');
-                        input.value = title;
-                        input.dispatchEvent(new Event('input'));
-                        document.getElementById('suggestions').classList.remove('show');
-                    }
-                });
-
-                // Hide suggestions when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.search-container')) {
-                        document.getElementById('suggestions').classList.remove('show');
-                    }
-                });
-
-                // Show suggestions when input is focused and has content
-                document.getElementById('search-input').addEventListener('focus', () => {
+            // Handle suggestion clicks
+            document.addEventListener('click', (e) => {
+                const suggestion = e.target.closest('.suggestion');
+                if (suggestion) {
+                    const title = suggestion.dataset.title;
                     const input = document.getElementById('search-input');
-                    if (input.value.length >= 2) {
-                        const suggestions = document.getElementById('suggestions');
-                        if (suggestions.children.length > 0) {
-                            suggestions.classList.add('show');
-                        }
-                    }
-                });
+                    input.value = title;
+                    input.dispatchEvent(new Event('input'));
+                    document.getElementById('suggestions').classList.remove('show');
+                }
+            });
 
-                console.log('RxHtmx Search Example (signals) loaded!');
-                </script>
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('suggestions').classList.remove('show');
+                }
+            });
+
+            // Show suggestions when input is focused and has content
+            document.getElementById('search-input').addEventListener('focus', () => {
+                const input = document.getElementById('search-input');
+                if (input.value.length >= 2) {
+                    const suggestions = document.getElementById('suggestions');
+                    if (suggestions.children.length > 0) {
+                        suggestions.classList.add('show');
+                    }
+                }
+            });
+
+            console.log('RxHtmx Search Example (signals) loaded!');
+        </script>
     </body>
 
 </html>

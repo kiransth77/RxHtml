@@ -1,0 +1,147 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🚀 Debug with HTTP Server",
+            "url": "http://localhost:5500/examples/form-validation/index.html",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🎯 Debug Form Validation (File)",
+            "file": "${workspaceFolder}/examples/form-validation/index.html",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": [
+                "--allow-file-access-from-files"
+            ]
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🔍 Debug Search Example",
+            "file": "${workspaceFolder}/examples/search/index.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "port": 9222,
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
+                "--allow-file-access-from-files",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-background-timer-throttling",
+                "--disable-renderer-backgrounding",
+                "--disable-backgrounding-occluded-windows"
+            ],
+            "trace": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "💬 Debug Chat Example",
+            "file": "${workspaceFolder}/examples/chat/index.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "port": 9222,
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
+                "--allow-file-access-from-files",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-background-timer-throttling",
+                "--disable-renderer-backgrounding",
+                "--disable-backgrounding-occluded-windows"
+            ],
+            "trace": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "🧪 Debug Tests",
+            "program": "${workspaceFolder}/node_modules/.bin/bun",
+            "args": [
+                "test",
+                "${workspaceFolder}/tests/integration.test.js",
+                "${workspaceFolder}/tests/createStream.standalone.test.js",
+                "${workspaceFolder}/tests/htmxSignalIntegration.standalone.test.js"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "🧪 Debug Specific Test",
+            "program": "${workspaceFolder}/node_modules/.bin/bun",
+            "args": [
+                "test",
+                "${file}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🚀 Launch with Live Server",
+            "url": "http://localhost:5500/${relativeFile}",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "port": 9223,
+            "runtimeArgs": [
+                "--no-first-run",
+                "--no-default-browser-check"
+            ],
+            "trace": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🎯 Debug Form (Simple)",
+            "url": "file://${workspaceFolder}/examples/form-validation/index.html",
+            "webRoot": "${workspaceFolder}",
+            "userDataDir": "${tmpDir}/chrome-debug",
+            "runtimeArgs": [
+                "--allow-file-access-from-files"
+            ]
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🔍 Debug Search (Simple)",
+            "url": "file://${workspaceFolder}/examples/search/index.html",
+            "webRoot": "${workspaceFolder}",
+            "userDataDir": "${tmpDir}/chrome-debug",
+            "runtimeArgs": [
+                "--allow-file-access-from-files"
+            ]
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "💬 Debug Chat (Simple)",
+            "url": "file://${workspaceFolder}/examples/chat/index.html",
+            "webRoot": "${workspaceFolder}",
+            "userDataDir": "${tmpDir}/chrome-debug",
+            "runtimeArgs": [
+                "--allow-file-access-from-files"
+            ]
+        }
+    ]
+}

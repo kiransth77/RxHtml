@@ -1,52 +1,555 @@
-# Getting Started with RxHtmx
+# Getting Started with RxHtmx Framework
 
-Welcome to RxHtmx! This guide will help you get up and running with reactive programming for web applications.
+Welcome to RxHtmx Framework! This comprehensive guide will help you get up and running with our modern reactive frontend framework.
 
-## What is RxHtmx?
+## What is RxHtmx Framework?
 
-RxHtmx bridges the gap between RxJS (reactive programming) and HTMX (server-driven UI), enabling you to build dynamic, responsive web applications with minimal complexity.
+RxHtmx Framework is a complete reactive frontend framework that provides:
 
-## Quick Start
+- **🔄 Enhanced Signal System**: Modern reactivity with signals, computed values, and effects
+- **🧩 Component Architecture**: Full component lifecycle with props and templates
+- **🛣️ Client-Side Router**: SPA routing with history API and guards
+- **📦 State Management**: Advanced store with actions, mutations, and middleware
+- **⚡ Build System**: Development server with HMR and production bundler
+- **🔧 CLI Tools**: Project scaffolding and development commands
 
-### 1. Basic Setup
+## Installation
+
+### Option 1: Create New Project (Recommended)
+
+```bash
+# Create a new RxHtmx project
+npx rxhtmx create my-app
+cd my-app
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### Option 2: Add to Existing Project
+
+```bash
+# Install the framework
+npm install rxhtmx
+
+# Or with Bun
+bun add rxhtmx
+```
+
+## Your First RxHtmx App
+
+### 1. Basic Component
+
+Create a simple counter component:
+
+```javascript
+// src/components/Counter.js
+import { defineComponent, signal } from 'rxhtmx';
+
+export const Counter = defineComponent({
+  name: 'Counter',
+  props: {
+    initialValue: { type: Number, default: 0 }
+  },
+  setup(props) {
+    const count = signal(props.initialValue);
+    
+    const increment = () => count.value++;
+    const decrement = () => count.value--;
+    const reset = () => count.value = props.initialValue;
+    
+    return {
+      count,
+      increment,
+      decrement,
+      reset
+    };
+  },
+  template: `
+    <div class="counter">
+      <h2>Counter: {{count}}</h2>
+      <div class="buttons">
+        <button @click="decrement">-</button>
+        <button @click="reset">Reset</button>
+        <button @click="increment">+</button>
+      </div>
+    </div>
+  `
+});
+```
+
+### 2. Setting Up the Application
+
+```javascript
+// src/main.js
+import { createComponent } from 'rxhtmx';
+import { Counter } from './components/Counter.js';
+
+// Create and mount the component
+const app = createComponent(Counter, { initialValue: 10 });
+app.mount('#app');
+```
+
+### 3. HTML Structure
 
 ```html
+<!-- index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <script src="https://unpkg.com/rxjs@7.8.1/dist/bundles/rxjs.umd.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My RxHtmx App</title>
+    <style>
+        .counter { text-align: center; padding: 2rem; }
+        .buttons { margin-top: 1rem; }
+        button { margin: 0 0.5rem; padding: 0.5rem 1rem; }
+    </style>
 </head>
 <body>
-    <input id="user-input" type="text" placeholder="Type something...">
-    <div id="output"></div>
-
-    <script type="module">
-        import { createStream, bindSignalToDom } from './path/to/rxhtmx.js';
-        
-        // Create a reactive stream from the input
-        const inputStream = createStream('#user-input');
-        
-        // Transform the data
-        const upperCaseStream = inputStream.pipe(
-            rxjs.operators.map(text => text.toUpperCase())
-        );
-        
-        // Bind to the output element
-        bindSignalToDom(upperCaseStream, '#output', (element, value) => {
-            element.textContent = `You typed: ${value}`;
-        });
-    </script>
+    <div id="app"></div>
+    <script type="module" src="./src/main.js"></script>
 </body>
 </html>
 ```
 
-### 2. Core Concepts
+## Core Concepts
 
-#### Creating Streams
+### 1. Signals - Reactive Primitives
+
 ```javascript
-// Create a stream from any input element
-const stream = createStream('#my-input');
+import { signal, computed, effect } from 'rxhtmx';
+
+// Create a reactive signal
+const count = signal(0);
+
+// Computed values automatically update
+const doubled = computed(() => count.value * 2);
+
+// Effects run when dependencies change
+effect(() => {
+  console.log(`Count is now: ${count.value}`);
+});
+
+// Update the signal
+count.value = 5; // Triggers computed and effect
+```
+
+### 2. Components - Building Blocks
+
+```javascript
+import { defineComponent, signal } from 'rxhtmx';
+
+const TodoItem = defineComponent({
+  name: 'TodoItem',
+  props: {
+    todo: { type: Object, required: true },
+    onToggle: { type: Function, required: true }
+  },
+  setup(props) {
+    const handleToggle = () => {
+      props.onToggle(props.todo.id);
+    };
+    
+    return { handleToggle };
+  },
+  template: `
+    <div class="todo-item" :class="{ completed: todo.completed }">
+      <input 
+        type="checkbox" 
+        :checked="todo.completed"
+        @change="handleToggle"
+      >
+      <span>{{todo.text}}</span>
+    </div>
+  `
+});
+```
+
+### 3. Routing - Navigation
+
+```javascript
+import { createRouter } from 'rxhtmx/router';
+
+const router = createRouter({
+  routes: [
+    { 
+      path: '/', 
+      component: Home,
+      name: 'home' 
+    },
+    { 
+      path: '/todos', 
+      component: TodoList,
+      name: 'todos'
+    },
+    { 
+      path: '/todo/:id', 
+      component: TodoDetail,
+      name: 'todo-detail'
+    }
+  ]
+});
+
+// Navigation
+router.push('/todos');
+router.push({ name: 'todo-detail', params: { id: '123' } });
+```
+
+### 4. State Management - Global State
+
+```javascript
+import { createStore } from 'rxhtmx/state';
+
+const store = createStore({
+  state: {
+    todos: [],
+    user: null,
+    loading: false
+  },
+  
+  mutations: {
+    setTodos: (state, todos) => state.todos = todos,
+    addTodo: (state, todo) => state.todos.push(todo),
+    setLoading: (state, loading) => state.loading = loading
+  },
+  
+  actions: {
+    async fetchTodos({ commit }) {
+      commit('setLoading', true);
+      try {
+        const todos = await api.getTodos();
+        commit('setTodos', todos);
+      } finally {
+        commit('setLoading', false);
+      }
+    }
+  },
+  
+### 2. Create Components
+
+```javascript
+// src/components/TodoApp.js
+import { defineComponent, signal } from 'rxhtmx';
+import { todoStore } from '../store/todos.js';
+
+export const TodoApp = defineComponent({
+  name: 'TodoApp',
+  setup() {
+    const newTodoText = signal('');
+    
+    const addTodo = () => {
+      if (newTodoText.value.trim()) {
+        todoStore.commit('addTodo', newTodoText.value.trim());
+        newTodoText.value = '';
+      }
+    };
+    
+    const toggleTodo = (id) => {
+      todoStore.commit('toggleTodo', id);
+    };
+    
+    const setFilter = (filter) => {
+      todoStore.commit('setFilter', filter);
+    };
+    
+    return {
+      newTodoText,
+      todos: todoStore.getters.filteredTodos,
+      stats: todoStore.getters.todoStats,
+      currentFilter: todoStore.state.filter,
+      addTodo,
+      toggleTodo,
+      setFilter
+    };
+  },
+  
+  template: `
+    <div class="todo-app">
+      <header>
+        <h1>RxHtmx Todos</h1>
+        <div class="add-todo">
+          <input 
+            v-model="newTodoText" 
+            @keyup.enter="addTodo"
+            placeholder="What needs to be done?"
+          >
+          <button @click="addTodo">Add</button>
+        </div>
+      </header>
+      
+      <main>
+        <div class="filters">
+          <button 
+            :class="{ active: currentFilter === 'all' }"
+            @click="setFilter('all')"
+          >
+            All ({{stats.total}})
+          </button>
+          <button 
+            :class="{ active: currentFilter === 'active' }"
+            @click="setFilter('active')"
+          >
+            Active ({{stats.active}})
+          </button>
+          <button 
+            :class="{ active: currentFilter === 'completed' }"
+            @click="setFilter('completed')"
+          >
+            Completed ({{stats.completed}})
+          </button>
+        </div>
+        
+        <div class="todo-list">
+          <div 
+            v-for="todo in todos" 
+            :key="todo.id"
+            class="todo-item"
+            :class="{ completed: todo.completed }"
+          >
+            <input 
+              type="checkbox" 
+              :checked="todo.completed"
+              @change="toggleTodo(todo.id)"
+            >
+            <span>{{todo.text}}</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  `
+});
+```
+
+### 3. Set Up the Main Application
+
+```javascript
+// src/main.js
+import { createComponent } from 'rxhtmx';
+import { TodoApp } from './components/TodoApp.js';
+
+// Create and mount the application
+const app = createComponent(TodoApp);
+app.mount('#app');
+```
+
+### 4. Add Styling
+
+```css
+/* src/style.css */
+.todo-app {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.add-todo {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-todo input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filters button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filters button.active {
+  background: #007bff;
+  color: white;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.todo-item.completed span {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+```
+
+## Next Steps
+
+Now that you have a basic understanding of RxHtmx Framework, explore these advanced topics:
+
+### 1. Advanced Component Patterns
+- Lifecycle hooks (`onMounted`, `onUpdated`, `onUnmounted`)
+- Component composition with slots
+- Higher-order components
+- Error boundaries
+
+### 2. Routing Features
+- Route guards and authentication
+- Nested routes and layouts
+- Route metadata
+- Navigation hooks
+
+### 3. State Management Patterns
+- Middleware for logging and persistence
+- Async actions with error handling
+- State normalization
+- DevTools integration
+
+### 4. Build System Configuration
+- Custom bundler plugins
+- Environment-specific builds
+- Code splitting strategies
+- Asset optimization
+
+## Resources
+
+- **[Framework Architecture](advanced.md)** - Deep dive into the framework
+- **[API Reference](README.md)** - Complete API documentation
+- **[Examples](../examples/README.md)** - Sample applications
+- **[Debugging Guide](debugging-troubleshooting.md)** - Troubleshooting help
+
+## Common Patterns
+
+### Handling Forms
+
+```javascript
+const LoginForm = defineComponent({
+  name: 'LoginForm',
+  setup() {
+    const form = reactive({
+      email: '',
+      password: '',
+      loading: false,
+      errors: {}
+    });
+    
+    const submit = async () => {
+      form.loading = true;
+      form.errors = {};
+      
+      try {
+        await authStore.dispatch('login', {
+          email: form.email,
+          password: form.password
+        });
+        router.push('/dashboard');
+      } catch (error) {
+        form.errors = error.fieldErrors || { general: error.message };
+      } finally {
+        form.loading = false;
+      }
+    };
+    
+    return { form, submit };
+  },
+  
+  template: `
+    <form @submit.prevent="submit">
+      <div class="field">
+        <input v-model="form.email" type="email" placeholder="Email">
+        <span v-if="form.errors.email" class="error">{{form.errors.email}}</span>
+      </div>
+      
+      <div class="field">
+        <input v-model="form.password" type="password" placeholder="Password">
+        <span v-if="form.errors.password" class="error">{{form.errors.password}}</span>
+      </div>
+      
+      <button :disabled="form.loading" type="submit">
+        {{form.loading ? 'Logging in...' : 'Login'}}
+      </button>
+      
+      <div v-if="form.errors.general" class="error">
+        {{form.errors.general}}
+      </div>
+    </form>
+  `
+});
+```
+
+### API Integration
+
+```javascript
+// src/services/api.js
+export class ApiService {
+  constructor(baseURL) {
+    this.baseURL = baseURL;
+  }
+  
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+  
+  get(endpoint) {
+    return this.request(endpoint);
+  }
+  
+  post(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+}
+
+// Usage in store actions
+const api = new ApiService('/api');
+
+export const dataStore = createStore({
+  state: { users: [], loading: false },
+  
+  mutations: {
+    setUsers: (state, users) => state.users = users,
+    setLoading: (state, loading) => state.loading = loading
+  },
+  
+  actions: {
+    async fetchUsers({ commit }) {
+      commit('setLoading', true);
+      try {
+        const users = await api.get('/users');
+        commit('setUsers', users);
+      } finally {
+        commit('setLoading', false);
+      }
+    }
+  }
+});
+```
+
+Ready to build amazing apps with RxHtmx Framework! 🚀
 
 // The stream emits values when the user types
 stream.subscribe(value => {

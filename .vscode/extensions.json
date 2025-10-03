@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "ms-vscode.vscode-js-debug",
+        "ritwickdey.liveserver",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "zignd.html-css-class-completion",
+        "ms-vscode.js-debug-nightly",
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-js-debug-companion"
+    ]
+}

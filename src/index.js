@@ -1,5 +1,7 @@
-// Dynamic import for htmx in browser environment
+// RxHtmx Framework - Main Entry Point
+// A modern, signal-based frontend framework
 
+// Dynamic import for htmx in browser environment
 let htmx;
 async function loadHtmx() {
   try {
@@ -18,7 +20,14 @@ if (typeof window !== 'undefined') {
   loadHtmx();
 }
 
+// Core framework exports
+export * from './core/signal.js';
+export * from './core/component.js';
+export * from './core/dom.js';
+export * from './router/router.js';
+export * from './state/store.js';
 
+// Legacy signal support (for backward compatibility)
 import { signal, effect } from './signal.js';
 
 

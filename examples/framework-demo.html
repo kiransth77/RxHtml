@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>RxHtmx Framework Demo</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .fade-enter {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            .fade-enter-active {
+                transition: opacity 0.3s, transform 0.3s;
+            }
+
+            .fade-enter-to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        </style>
+    </head>
+
+    <body class="bg-gray-100 min-h-screen">
+        <div id="app"></div>
+
+        <script type="module">
+            // Import framework components
+            import {
+                signal,
+                computed,
+                effect,
+                defineComponent,
+                createApp,
+                createRouter,
+                createStore,
+                logger,
+                persistence
+            } from '../src/index.js';
+
+            // Global store
+            const store = createStore({
+                state: {
+                    user: { name: 'Guest', theme: 'light' },
+                    todos: []
+                },
+                getters: {
+                    todoCount: (state) => state.todos.filter(todo => !todo.completed).length,
+                    completedCount: (state) => state.todos.filter(todo => todo.completed).length
+                },
+                actions: {
+                    addTodo({ state }, text) {
+                        state.todos.push({
+                            id: Date.now(),
+                            text,
+                            completed: false,
+                            createdAt: new Date()
+                        });
+                    },
+                    toggleTodo({ state }, id) {
+                        const todo = state.todos.find(t => t.id === id);
+                        if (todo) {
+                            todo.completed = !todo.completed;
+                        }
+                    },
+                    setUser({ state }, user) {
+                        state.user = { ...state.user, ...user };
+                    },
+                    toggleTheme({ state }) {
+                        state.user.theme = state.user.theme === 'light' ? 'dark' : 'light';
+                    }
+                },
+                middleware: [logger, persistence({ key: 'rxhtmx-demo' })]
+            });
+
+            // Header Component
+            const Header = defineComponent({
+                name: 'Header',
+                setup() {
+                    const user = store.state.user;
+                    const todoCount = store.getters.todoCount;
+
+                    const toggleTheme = () => {
+                        store.dispatch('toggleTheme');
+                    };
+
+                    return {
+                        user,
+                        todoCount,
+                        toggleTheme
+                    };
+                },
+                template: `
+        <header class="bg-white shadow-sm border-b">
+          <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900">RxHtmx Framework</h1>
+                <p class="text-sm text-gray-600">Full-featured demo application</p>
+              </div>
+              <div class="flex items-center space-x-4">
+                <span class="text-sm">Welcome, {{user.name}}!</span>
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                  {{todoCount}} active todos
+                </span>
+                <button 
+                  @click="toggleTheme"
+                  class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm"
+                >
+                  {{user.theme === 'light' ? '🌙' : '☀️'}} Toggle Theme
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+      `
+            });
+
+            // Todo Item Component
+            const TodoItem = defineComponent({
+                name: 'TodoItem',
+                props: {
+                    todo: { type: Object, required: true }
+                },
+                setup(props) {
+                    const toggle = () => {
+                        store.dispatch('toggleTodo', props.todo.id);
+                    };
+
+                    return {
+                        toggle
+                    };
+                },
+                template: `
+        <li class="flex items-center p-3 bg-white rounded-lg shadow-sm border">
+          <input 
+            type="checkbox" 
+            :checked="todo.completed"
+            @change="toggle"
+            class="mr-3 h-4 w-4 text-blue-600"
+          />
+          <span :class="todo.completed ? 'line-through text-gray-500' : 'text-gray-900'">
+            {{todo.text}}
+          </span>
+          <span class="ml-auto text-xs text-gray-400">
+            {{new Date(todo.createdAt).toLocaleTimeString()}}
+          </span>
+        </li>
+      `
+            });
+
+            // Todo List Component
+            const TodoList = defineComponent({
+                name: 'TodoList',
+                setup() {
+                    const todos = store.state.todos;
+                    const newTodoText = signal('');
+                    const filter = signal('all'); // all, active, completed
+
+                    const filteredTodos = computed(() => {
+                        switch (filter.value) {
+                            case 'active':
+                                return todos.filter(todo => !todo.completed);
+                            case 'completed':
+                                return todos.filter(todo => todo.completed);
+                            default:
+                                return todos;
+                        }
+                    });
+
+                    const addTodo = () => {
+                        if (newTodoText.value.trim()) {
+                            store.dispatch('addTodo', newTodoText.value.trim());
+                            newTodoText.value = '';
+                        }
+                    };
+
+                    const setFilter = (filterType) => {
+                        filter.value = filterType;
+                    };
+
+                    return {
+                        todos,
+                        filteredTodos,
+                        newTodoText,
+                        filter,
+                        addTodo,
+                        setFilter
+                    };
+                },
+                template: `
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">Todo Management</h2>
+          
+          <!-- Add Todo Form -->
+          <div class="flex mb-6">
+            <input 
+              type="text"
+              v-model="newTodoText"
+              @keyup.enter="addTodo"
+              placeholder="Add a new todo..."
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              @click="addTodo"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r-md"
+            >
+              Add
+            </button>
+          </div>
+          
+          <!-- Filter Buttons -->
+          <div class="flex space-x-2 mb-4">
+            <button 
+              @click="setFilter('all')"
+              :class="filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+              class="px-3 py-1 rounded text-sm"
+            >
+              All
+            </button>
+            <button 
+              @click="setFilter('active')"
+              :class="filter === 'active' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+              class="px-3 py-1 rounded text-sm"
+            >
+              Active
+            </button>
+            <button 
+              @click="setFilter('completed')"
+              :class="filter === 'completed' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+              class="px-3 py-1 rounded text-sm"
+            >
+              Completed
+            </button>
+          </div>
+          
+          <!-- Todo List -->
+          <ul class="space-y-2">
+            <TodoItem 
+              v-for="todo in filteredTodos" 
+              :key="todo.id" 
+              :todo="todo" 
+            />
+          </ul>
+          
+          <div v-if="filteredTodos.length === 0" class="text-center py-8 text-gray-500">
+            No todos found
+          </div>
+        </div>
+      `
+            });
+
+            // Counter Component
+            const Counter = defineComponent({
+                name: 'Counter',
+                setup() {
+                    const count = signal(0);
+                    const step = signal(1);
+
+                    const increment = () => {
+                        count.value += step.value;
+                    };
+
+                    const decrement = () => {
+                        count.value -= step.value;
+                    };
+
+                    const reset = () => {
+                        count.value = 0;
+                    };
+
+                    // Computed values
+                    const isEven = computed(() => count.value % 2 === 0);
+                    const displayColor = computed(() => {
+                        if (count.value > 10) return 'text-green-600';
+                        if (count.value < 0) return 'text-red-600';
+                        return 'text-blue-600';
+                    });
+
+                    return {
+                        count,
+                        step,
+                        increment,
+                        decrement,
+                        reset,
+                        isEven,
+                        displayColor
+                    };
+                },
+                template: `
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">Reactive Counter</h2>
+          
+          <div class="text-center mb-6">
+            <div :class="displayColor" class="text-6xl font-bold mb-2">
+              {{count}}
+            </div>
+            <div class="text-sm text-gray-600">
+              Number is {{isEven ? 'even' : 'odd'}}
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-center space-x-4 mb-4">
+            <button 
+              @click="decrement"
+              class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+            >
+              -{{step}}
+            </button>
+            <button 
+              @click="reset"
+              class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+            >
+              Reset
+            </button>
+            <button 
+              @click="increment"
+              class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+            >
+              +{{step}}
+            </button>
+          </div>
+          
+          <div class="text-center">
+            <label class="text-sm text-gray-600">
+              Step size:
+              <input 
+                type="number" 
+                v-model.number="step"
+                min="1"
+                class="ml-2 w-16 px-2 py-1 border border-gray-300 rounded"
+              />
+            </label>
+          </div>
+        </div>
+      `
+            });
+
+            // Statistics Component
+            const Statistics = defineComponent({
+                name: 'Statistics',
+                setup() {
+                    const completedCount = store.getters.completedCount;
+                    const todoCount = store.getters.todoCount;
+                    const totalTodos = computed(() => store.state.todos.length);
+                    const completionRate = computed(() => {
+                        return totalTodos.value > 0
+                            ? Math.round((completedCount.value / totalTodos.value) * 100)
+                            : 0;
+                    });
+
+                    return {
+                        completedCount,
+                        todoCount,
+                        totalTodos,
+                        completionRate
+                    };
+                },
+                template: `
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">Statistics</h2>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-blue-600">{{totalTodos}}</div>
+              <div class="text-sm text-gray-600">Total Todos</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-green-600">{{completedCount}}</div>
+              <div class="text-sm text-gray-600">Completed</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-orange-600">{{todoCount}}</div>
+              <div class="text-sm text-gray-600">Active</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-purple-600">{{completionRate}}%</div>
+              <div class="text-sm text-gray-600">Completion Rate</div>
+            </div>
+          </div>
+        </div>
+      `
+            });
+
+            // Main App Component
+            const App = defineComponent({
+                name: 'App',
+                setup() {
+                    const user = store.state.user;
+
+                    // Theme effect
+                    effect(() => {
+                        document.body.className = user.theme === 'dark'
+                            ? 'bg-gray-900 min-h-screen text-white'
+                            : 'bg-gray-100 min-h-screen';
+                    });
+
+                    return {
+                        user
+                    };
+                },
+                template: `
+        <div>
+          <Header />
+          <main class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div class="space-y-8">
+                <TodoList />
+                <Counter />
+              </div>
+              <div>
+                <Statistics />
+              </div>
+            </div>
+          </main>
+        </div>
+      `
+            });
+
+            // Register components globally
+            const app = createApp(App);
+            app.component('Header', Header);
+            app.component('TodoItem', TodoItem);
+            app.component('TodoList', TodoList);
+            app.component('Counter', Counter);
+            app.component('Statistics', Statistics);
+
+            // Mount the app
+            app.mount('#app');
+
+            // Initialize with some sample data
+            store.dispatch('addTodo', 'Learn RxHtmx framework');
+            store.dispatch('addTodo', 'Build an awesome app');
+            store.dispatch('addTodo', 'Deploy to production');
+
+            // Log framework info
+            console.log('🚀 RxHtmx Framework Demo loaded successfully!');
+            console.log('Features demonstrated:');
+            console.log('- Reactive signals and computed values');
+            console.log('- Component system with props and events');
+            console.log('- State management with store');
+            console.log('- Middleware (logging and persistence)');
+            console.log('- Dynamic styling and effects');
+        </script>
+    </body>
+
+</html>

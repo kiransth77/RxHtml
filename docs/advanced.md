@@ -1,53 +1,437 @@
-# Advanced RxHtmx Patterns
+# Advanced RxHtmx Framework Patterns
 
-## Complex Stream Compositions
+This guide covers advanced concepts and patterns for building complex applications with RxHtmx Framework.
 
-### Multi-Step Form Validation
+## Framework Architecture Deep Dive
+
+### Core System Integration
+
+The RxHtmx framework consists of four core systems that work together seamlessly:
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Signal System │    │  Component Sys  │
+│   • signal()    │◄──►│  • defineComp() │
+│   • computed()  │    │  • lifecycle    │
+│   • effect()    │    │  • templates    │
+└─────────────────┘    └─────────────────┘
+         ▲                       ▲
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│   Router System │    │  State System   │
+│   • routes      │◄──►│  • store        │
+│   • navigation  │    │  • mutations    │
+│   • guards      │    │  • actions      │
+└─────────────────┘    └─────────────────┘
+```
+
+## Advanced Signal Patterns
+
+### Computed Value Chains
 
 ```javascript
-import { createStream, bindSignalToDom } from 'rxhtmx';
-import { combineLatest, map, startWith } from 'rxjs';
+import { signal, computed, effect } from 'rxhtmx';
 
-// Create streams for each form field
-const nameStream = createStream('#name').pipe(startWith(''));
-const emailStream = createStream('#email').pipe(startWith(''));
-const passwordStream = createStream('#password').pipe(startWith(''));
+// Base signals
+const price = signal(100);
+const quantity = signal(2);
+const taxRate = signal(0.08);
 
-// Validation logic
-const validationStream = combineLatest([
-    nameStream,
-    emailStream,
-    passwordStream
-]).pipe(
-    map(([name, email, password]) => ({
-        name: name.length >= 2,
-        email: email.includes('@') && email.includes('.'),
-        password: password.length >= 8,
-        isValid: name.length >= 2 && 
-                email.includes('@') && 
-                email.includes('.') && 
-                password.length >= 8
-    }))
-);
+// Computed chain
+const subtotal = computed(() => price.value * quantity.value);
+const tax = computed(() => subtotal.value * taxRate.value);
+const total = computed(() => subtotal.value + tax.value);
 
-// Bind validation results to UI
-bindSignalToDom(validationStream, '#submit-btn', (btn, validation) => {
-    btn.disabled = !validation.isValid;
-    btn.className = validation.isValid ? 'btn-success' : 'btn-disabled';
+// Complex derivations
+const priceBreakdown = computed(() => ({
+  subtotal: subtotal.value,
+  tax: tax.value,
+  total: total.value,
+  savings: price.value > 50 ? price.value * 0.1 : 0
+}));
+
+// React to changes across the chain
+effect(() => {
+  console.log('Price breakdown updated:', priceBreakdown.value);
 });
 ```
 
-### Real-time Data Synchronization
+### Signal Composition Patterns
 
 ```javascript
-import { integrateHtmxWithSignals } from 'rxhtmx';
-import { filter, map, merge } from 'rxjs';
+import { signal, computed, batch } from 'rxhtmx';
 
-// Listen to HTMX updates
-const htmxSignal = integrateHtmxWithSignals();
+class FormState {
+  constructor() {
+    this.fields = {
+      name: signal(''),
+      email: signal(''),
+      password: signal('')
+    };
+    
+    this.validation = computed(() => ({
+      name: this.validateName(this.fields.name.value),
+      email: this.validateEmail(this.fields.email.value),
+      password: this.validatePassword(this.fields.password.value)
+    }));
+    
+    this.isValid = computed(() => {
+      const validation = this.validation.value;
+      return Object.values(validation).every(field => field.valid);
+    });
+    
+    this.summary = computed(() => ({
+      fields: Object.keys(this.fields).length,
+      filled: Object.values(this.fields).filter(f => f.value.trim()).length,
+      valid: this.isValid.value,
+      errors: Object.values(this.validation.value)
+        .filter(v => !v.valid)
+        .map(v => v.message)
+    }));
+  }
+  
+  validateName(name) {
+    return {
+      valid: name.length >= 2,
+      message: name.length < 2 ? 'Name must be at least 2 characters' : ''
+    };
+  }
+  
+  validateEmail(email) {
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    return {
+      valid: isValid,
+      message: !isValid ? 'Please enter a valid email address' : ''
+    };
+  }
+  
+  validatePassword(password) {
+    const isValid = password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password);
+    return {
+      valid: isValid,
+      message: !isValid ? 'Password must be 8+ chars with upper, lower, and number' : ''
+    };
+  }
+  
+  reset() {
+    batch(() => {
+      Object.values(this.fields).forEach(field => field.value = '');
+    });
+  }
+  
+  populate(data) {
+    batch(() => {
+      Object.entries(data).forEach(([key, value]) => {
+        if (this.fields[key]) {
+          this.fields[key].value = value;
+        }
+      });
+    });
+  }
+}
 
-// Filter for specific content updates
-const dataUpdates = htmxSignal.pipe(
+// Usage in component
+const ContactForm = defineComponent({
+  name: 'ContactForm',
+  setup() {
+    const formState = new FormState();
+    
+    const submit = async () => {
+      if (!formState.isValid.value) return;
+      
+      try {
+        await api.submitContact({
+          name: formState.fields.name.value,
+          email: formState.fields.email.value,
+          password: formState.fields.password.value
+        });
+        formState.reset();
+      } catch (error) {
+        console.error('Submission failed:', error);
+      }
+    };
+    
+    return { formState, submit };
+  }
+});
+```
+
+## Advanced Component Patterns
+
+### Higher-Order Components
+
+```javascript
+import { defineComponent } from 'rxhtmx';
+
+// HOC for loading states
+function withLoading(WrappedComponent) {
+  return defineComponent({
+    name: `WithLoading(${WrappedComponent.name})`,
+    props: {
+      loading: { type: Boolean, default: false },
+      ...WrappedComponent.props
+    },
+    setup(props) {
+      const wrappedProps = { ...props };
+      delete wrappedProps.loading;
+      
+      return { wrappedProps };
+    },
+    template: `
+      <div>
+        <div v-if="loading" class="loading-spinner">
+          Loading...
+        </div>
+        <component 
+          v-else 
+          :is="WrappedComponent" 
+          v-bind="wrappedProps"
+        />
+      </div>
+    `
+  });
+}
+
+// HOC for error boundaries
+function withErrorBoundary(WrappedComponent) {
+  return defineComponent({
+    name: `WithErrorBoundary(${WrappedComponent.name})`,
+    setup() {
+      const error = signal(null);
+      
+      const handleError = (err) => {
+        error.value = err;
+        console.error('Component error:', err);
+      };
+      
+      return { error, handleError };
+    },
+    template: `
+      <div>
+        <div v-if="error" class="error-boundary">
+          <h3>Something went wrong</h3>
+          <p>{{error.message}}</p>
+          <button @click="error = null">Try Again</button>
+        </div>
+        <component 
+          v-else 
+          :is="WrappedComponent" 
+          @error="handleError"
+        />
+      </div>
+    `,
+    errorCaptured(error) {
+      this.handleError(error);
+      return false; // Prevent error propagation
+    }
+  });
+}
+
+// Usage
+const EnhancedUserList = withErrorBoundary(withLoading(UserList));
+```
+
+### Render Props Pattern
+
+```javascript
+const DataProvider = defineComponent({
+  name: 'DataProvider',
+  props: {
+    url: { type: String, required: true },
+    default: { type: Function, required: true }
+  },
+  setup(props) {
+    const data = signal(null);
+    const loading = signal(false);
+    const error = signal(null);
+    
+    const fetchData = async () => {
+      loading.value = true;
+      error.value = null;
+      
+      try {
+        const response = await fetch(props.url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        data.value = await response.json();
+      } catch (err) {
+        error.value = err;
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    onMounted(fetchData);
+    
+    return { data, loading, error, refetch: fetchData };
+  },
+  template: `
+    <div>
+      <slot 
+        :data="data" 
+        :loading="loading" 
+        :error="error" 
+        :refetch="refetch"
+      />
+    </div>
+  `
+});
+
+// Usage
+const UserProfile = defineComponent({
+  template: `
+    <DataProvider url="/api/user/123">
+      <template #default="{ data: user, loading, error, refetch }">
+        <div v-if="loading">Loading user...</div>
+        <div v-else-if="error">
+          Error: {{error.message}}
+          <button @click="refetch">Retry</button>
+        </div>
+        <div v-else-if="user">
+          <h2>{{user.name}}</h2>
+          <p>{{user.email}}</p>
+        </div>
+      </template>
+    </DataProvider>
+  `
+});
+```
+
+## Advanced Routing Patterns
+
+### Route Guards and Authentication
+
+```javascript
+import { createRouter } from 'rxhtmx/router';
+import { authStore } from './store/auth.js';
+
+// Authentication guard
+const requireAuth = (to, from) => {
+  if (!authStore.state.user) {
+    return { path: '/login', query: { redirect: to.fullPath } };
+  }
+  return true;
+};
+
+// Role-based guard
+const requireRole = (roles) => (to, from) => {
+  const user = authStore.state.user;
+  if (!user || !roles.includes(user.role)) {
+    return { path: '/unauthorized' };
+  }
+  return true;
+};
+
+// Admin guard
+const requireAdmin = requireRole(['admin', 'super-admin']);
+
+const router = createRouter({
+  routes: [
+    // Public routes
+    { path: '/', component: Home },
+    { path: '/login', component: Login },
+    { path: '/register', component: Register },
+    
+    // Protected routes
+    { 
+      path: '/dashboard', 
+      component: Dashboard,
+      beforeEnter: requireAuth
+    },
+    { 
+      path: '/profile', 
+      component: Profile,
+      beforeEnter: requireAuth
+    },
+    
+    // Admin routes
+    {
+      path: '/admin',
+      component: AdminLayout,
+      beforeEnter: [requireAuth, requireAdmin],
+      children: [
+        { path: '', component: AdminDashboard },
+        { path: 'users', component: UserManagement },
+        { path: 'settings', component: AdminSettings }
+      ]
+    }
+  ]
+});
+
+// Global navigation guard
+router.beforeEach(async (to, from) => {
+  // Check if token is still valid
+  if (authStore.state.token) {
+    try {
+      await authStore.dispatch('validateToken');
+    } catch (error) {
+      authStore.commit('logout');
+      if (to.meta.requiresAuth) {
+        return '/login';
+      }
+    }
+  }
+});
+```
+
+### Dynamic Route Loading
+
+```javascript
+const router = createRouter({
+  routes: [
+    {
+      path: '/modules/:module',
+      component: () => import('./components/ModuleLoader.js'),
+      beforeEnter: async (to) => {
+        const { module } = to.params;
+        
+        // Validate module exists
+        const availableModules = await api.getAvailableModules();
+        if (!availableModules.includes(module)) {
+          return { path: '/404' };
+        }
+        
+        // Load module configuration
+        const config = await api.getModuleConfig(module);
+        to.meta.moduleConfig = config;
+      }
+    }
+  ]
+});
+
+const ModuleLoader = defineComponent({
+  name: 'ModuleLoader',
+  setup() {
+    const route = useRoute();
+    const moduleComponent = signal(null);
+    const loading = signal(true);
+    
+    onMounted(async () => {
+      const { module } = route.value.params;
+      const config = route.value.meta.moduleConfig;
+      
+      try {
+        // Dynamically import module component
+        const moduleExports = await import(`./modules/${module}/index.js`);
+        moduleComponent.value = moduleExports.default;
+      } catch (error) {
+        console.error(`Failed to load module ${module}:`, error);
+      } finally {
+        loading.value = false;
+      }
+    });
+    
+    return { moduleComponent, loading };
+  },
+  template: `
+    <div>
+      <div v-if="loading">Loading module...</div>
+      <component v-else-if="moduleComponent" :is="moduleComponent" />
+      <div v-else>Failed to load module</div>
+    </div>
+  `
+});
+```
     filter(event => event.type === 'afterSwap'),
     filter(event => event.detail.target.id === 'data-container'),
     map(event => event.detail.xhr.response)

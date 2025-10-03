@@ -1,129 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RxHtmx App Example (Global & Scoped Signals)</title>
-  <!-- Tailwind CSS CDN for rapid prototyping -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
-  <div class="max-w-3xl mx-auto p-6">
-    <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-300 mb-6 text-center">RxHtmx App: Global & Scoped Signal Containers</h1>
-    <div class="mb-8 p-6 rounded-lg bg-pink-50 dark:bg-pink-900/40 shadow global">
-      <h2 class="text-lg font-semibold mb-4 text-pink-700 dark:text-pink-200">Global State (User & App Config)</h2>
-      <div class="flex flex-col md:flex-row gap-4 mb-4">
-        <label class="flex-1">User Name:
-          <input id="user-name" type="text" class="w-full border-2 border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100" />
-        </label>
-        <button id="set-user" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">Set User</button>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RxHtmx App Example (Global & Scoped Signals)</title>
+    <!-- Tailwind CSS CDN for rapid prototyping -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
+    <div class="max-w-3xl mx-auto p-6">
+      <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-300 mb-6 text-center">RxHtmx App: Global & Scoped
+        Signal Containers</h1>
+      <div class="mb-8 p-6 rounded-lg bg-pink-50 dark:bg-pink-900/40 shadow global">
+        <h2 class="text-lg font-semibold mb-4 text-pink-700 dark:text-pink-200">Global State (User & App Config)</h2>
+        <div class="flex flex-col md:flex-row gap-4 mb-4">
+          <label class="flex-1">User Name:
+            <input id="user-name" type="text"
+              class="w-full border-2 border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100" />
+          </label>
+          <button id="set-user"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">Set
+            User</button>
+        </div>
+        <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
+          <span class="flex-1"><b>Current User:</b> <span id="current-user"></span></span>
+          <span class="flex-1"><b>Current Theme:</b> <span id="current-theme"></span></span>
+          <button id="theme-toggle"
+            class="ml-auto bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 font-bold py-2 px-4 rounded transition-colors">Toggle
+            Dark/Light</button>
+        </div>
       </div>
-      <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
-        <span class="flex-1"><b>Current User:</b> <span id="current-user"></span></span>
-        <span class="flex-1"><b>Current Theme:</b> <span id="current-theme"></span></span>
-        <button id="theme-toggle" class="ml-auto bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 font-bold py-2 px-4 rounded transition-colors">Toggle Dark/Light</button>
+      <div class="mb-8 p-6 rounded-lg bg-green-50 dark:bg-green-900/40 shadow scoped">
+        <h2 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-200">Page 1: Counter (Scoped State)</h2>
+        <div class="flex gap-4 items-center mb-2">
+          <button id="inc1"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">Increment</button>
+          <button id="dec1"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">Decrement</button>
+          <b>Value:</b> <span id="counter1"></span>
+        </div>
+      </div>
+      <div class="mb-8 p-6 rounded-lg bg-blue-50 dark:bg-blue-900/40 shadow scoped">
+        <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-200">Page 2: Todo List (Scoped State)</h2>
+        <div class="flex gap-4 mb-2">
+          <input id="todo-input" type="text" placeholder="Add todo"
+            class="flex-1 border-2 border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100" />
+          <button id="add-todo"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">Add</button>
+        </div>
+        <ul id="todo-list" class="list-disc pl-6 text-gray-800 dark:text-gray-100"></ul>
       </div>
     </div>
-    <div class="mb-8 p-6 rounded-lg bg-green-50 dark:bg-green-900/40 shadow scoped">
-      <h2 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-200">Page 1: Counter (Scoped State)</h2>
-      <div class="flex gap-4 items-center mb-2">
-        <button id="inc1" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">Increment</button>
-        <button id="dec1" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">Decrement</button>
-        <b>Value:</b> <span id="counter1"></span>
-      </div>
-    </div>
-    <div class="mb-8 p-6 rounded-lg bg-blue-50 dark:bg-blue-900/40 shadow scoped">
-      <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-200">Page 2: Todo List (Scoped State)</h2>
-      <div class="flex gap-4 mb-2">
-        <input id="todo-input" type="text" placeholder="Add todo" class="flex-1 border-2 border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100" />
-        <button id="add-todo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">Add</button>
-      </div>
-      <ul id="todo-list" class="list-disc pl-6 text-gray-800 dark:text-gray-100"></ul>
-    </div>
-  </div>
-  <script type="module">
-    import { createGlobalSignalContainer, createScopedSignalContainer } from '../src/signalContainer.js';
+    <script type="module">
+      import { createGlobalSignalContainer, createScopedSignalContainer } from '../src/signalContainer.js';
 
-    // --- Global container for user and app config ---
-    const globalSignals = createGlobalSignalContainer();
-    // Initialize if not present
-    globalSignals.get('user', { name: 'Guest' });
-    globalSignals.get('config', { theme: 'light' });
+      // --- Global container for user and app config ---
+      const globalSignals = createGlobalSignalContainer();
+      // Initialize if not present
+      globalSignals.get('user', { name: 'Guest' });
+      globalSignals.get('config', { theme: 'light' });
 
-    // Bind global user
-    const userNameInput = document.getElementById('user-name');
-    const setUserBtn = document.getElementById('set-user');
-    const currentUser = document.getElementById('current-user');
-    globalSignals.get('user').subscribe(user => {
-      currentUser.textContent = user && user.name ? user.name : 'Guest';
-    });
-    setUserBtn.onclick = () => {
-      globalSignals.set('user', { name: userNameInput.value || 'Guest' });
-    };
-
-    // Theme toggle logic (global signal + Tailwind dark mode)
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const currentTheme = document.getElementById('current-theme');
-    function setHtmlTheme(theme) {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-      document.body.classList.toggle('bg-gray-900', theme === 'dark');
-      document.body.classList.toggle('bg-gray-100', theme !== 'dark');
-    }
-    // Subscribe to config signal for theme
-    globalSignals.get('config').subscribe(cfg => {
-      const theme = cfg && cfg.theme ? cfg.theme : 'light';
-      currentTheme.textContent = theme;
-      setHtmlTheme(theme);
-    });
-    // Toggle theme on button click
-    themeToggleBtn.onclick = () => {
-      const cfg = globalSignals.get('config').value;
-      const newTheme = cfg.theme === 'dark' ? 'light' : 'dark';
-      globalSignals.set('config', { ...cfg, theme: newTheme });
-    };
-
-    // --- Scoped container for Page 1 (Counter) ---
-    const page1Signals = createScopedSignalContainer();
-    page1Signals.get('counter', 0);
-    const counter1 = document.getElementById('counter1');
-    document.getElementById('inc1').onclick = () => {
-      page1Signals.set('counter', page1Signals.get('counter').value + 1);
-    };
-    document.getElementById('dec1').onclick = () => {
-      page1Signals.set('counter', page1Signals.get('counter').value - 1);
-    };
-    page1Signals.get('counter').subscribe(val => {
-      counter1.textContent = val;
-    });
-
-    // --- Scoped container for Page 2 (Todo List) ---
-    const page2Signals = createScopedSignalContainer();
-    page2Signals.get('todos', []);
-    const todoInput = document.getElementById('todo-input');
-    const addTodoBtn = document.getElementById('add-todo');
-    const todoList = document.getElementById('todo-list');
-    addTodoBtn.onclick = () => {
-      const val = todoInput.value.trim();
-      if (val) {
-        const todos = page2Signals.get('todos').value.slice();
-        todos.push({ text: val, done: false });
-        page2Signals.set('todos', todos);
-        todoInput.value = '';
-      }
-    };
-    page2Signals.get('todos').subscribe(todos => {
-      todoList.innerHTML = '';
-      todos.forEach((todo, idx) => {
-        const li = document.createElement('li');
-        li.textContent = todo.text + (todo.done ? ' (done)' : '');
-        li.onclick = () => {
-          const newTodos = todos.slice();
-          newTodos[idx] = { ...todo, done: !todo.done };
-          page2Signals.set('todos', newTodos);
-        };
-        todoList.appendChild(li);
+      // Bind global user
+      const userNameInput = document.getElementById('user-name');
+      const setUserBtn = document.getElementById('set-user');
+      const currentUser = document.getElementById('current-user');
+      globalSignals.get('user').subscribe(user => {
+        currentUser.textContent = user && user.name ? user.name : 'Guest';
       });
-    });
-  </script>
-</body>
+      setUserBtn.onclick = () => {
+        globalSignals.set('user', { name: userNameInput.value || 'Guest' });
+      };
+
+      // Theme toggle logic (global signal + Tailwind dark mode)
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const currentTheme = document.getElementById('current-theme');
+      function setHtmlTheme(theme) {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.body.classList.toggle('bg-gray-900', theme === 'dark');
+        document.body.classList.toggle('bg-gray-100', theme !== 'dark');
+      }
+      // Subscribe to config signal for theme
+      globalSignals.get('config').subscribe(cfg => {
+        const theme = cfg && cfg.theme ? cfg.theme : 'light';
+        currentTheme.textContent = theme;
+        setHtmlTheme(theme);
+      });
+      // Toggle theme on button click
+      themeToggleBtn.onclick = () => {
+        const cfg = globalSignals.get('config').value;
+        const newTheme = cfg.theme === 'dark' ? 'light' : 'dark';
+        globalSignals.set('config', { ...cfg, theme: newTheme });
+      };
+
+      // --- Scoped container for Page 1 (Counter) ---
+      const page1Signals = createScopedSignalContainer();
+      page1Signals.get('counter', 0);
+      const counter1 = document.getElementById('counter1');
+      document.getElementById('inc1').onclick = () => {
+        page1Signals.set('counter', page1Signals.get('counter').value + 1);
+      };
+      document.getElementById('dec1').onclick = () => {
+        page1Signals.set('counter', page1Signals.get('counter').value - 1);
+      };
+      page1Signals.get('counter').subscribe(val => {
+        counter1.textContent = val;
+      });
+
+      // --- Scoped container for Page 2 (Todo List) ---
+      const page2Signals = createScopedSignalContainer();
+      page2Signals.get('todos', []);
+      const todoInput = document.getElementById('todo-input');
+      const addTodoBtn = document.getElementById('add-todo');
+      const todoList = document.getElementById('todo-list');
+      addTodoBtn.onclick = () => {
+        const val = todoInput.value.trim();
+        if (val) {
+          const todos = page2Signals.get('todos').value.slice();
+          todos.push({ text: val, done: false });
+          page2Signals.set('todos', todos);
+          todoInput.value = '';
+        }
+      };
+      page2Signals.get('todos').subscribe(todos => {
+        todoList.innerHTML = '';
+        todos.forEach((todo, idx) => {
+          const li = document.createElement('li');
+          li.textContent = todo.text + (todo.done ? ' (done)' : '');
+          li.onclick = () => {
+            const newTodos = todos.slice();
+            newTodos[idx] = { ...todo, done: !todo.done };
+            page2Signals.set('todos', newTodos);
+          };
+          todoList.appendChild(li);
+        });
+      });
+    </script>
+  </body>
+
 </html>

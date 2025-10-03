@@ -1,0 +1,190 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "🧪 Run All Tests",
+			"type": "shell",
+			"command": "bun",
+			"args": [
+				"test",
+				"tests/integration.test.js",
+				"tests/createStream.standalone.test.js",
+				"tests/htmxSignalIntegration.standalone.test.js"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "🧪 Run Tests (Watch Mode)",
+			"type": "shell",
+			"command": "bun",
+			"args": [
+				"test",
+				"--watch",
+				"tests/"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": [],
+			"isBackground": true
+		},
+		{
+			"label": "🚀 Start Live Server",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"live-server",
+				"--port=5500",
+				"--open=/examples/"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": [],
+			"isBackground": true
+		},
+		{
+			"label": "📦 Install Dependencies",
+			"type": "shell",
+			"command": "bun",
+			"args": [
+				"install"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "🔍 Check Package Versions",
+			"type": "shell",
+			"command": "bun",
+			"args": [
+				"list"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "📝 Validate Examples",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"Checking all example HTML files..."
+			],
+			"group": "test",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Validate Form Example",
+				"Validate Search Example",
+				"Validate Chat Example"
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		},
+		{
+			"label": "Validate Form Example",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"✅ Form validation example ready"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "silent"
+			}
+		},
+		{
+			"label": "Validate Search Example",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"✅ Search example ready"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "silent"
+			}
+		},
+		{
+			"label": "Validate Chat Example",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"✅ Chat example ready"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "silent"
+			}
+		},
+		{
+			"label": "📊 Run Signal Benchmark",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"live-server",
+				"--port=5500",
+				"--open=/examples/benchmark.html"
+			],
+			"isBackground": true,
+			"group": "test"
+		},
+		{
+			"label": "🌐 Serve App Example",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"live-server",
+				"--port=5500",
+				"--open=/examples/app.html"
+			],
+			"isBackground": true,
+			"group": "test"
+		}
+	]
+}

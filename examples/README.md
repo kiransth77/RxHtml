@@ -1,111 +1,220 @@
-# Examples Overview
+# RxHtmx Framework Examples
 
-This directory contains practical examples demonstrating different aspects of RxHtmx in action.
+This directory contains comprehensive examples showcasing the full capabilities of the RxHtmx reactive frontend framework. These examples demonstrate real-world applications built with components, routing, state management, and reactive patterns.
 
 ## Available Examples
 
 ### 1. [Form Validation](./form-validation/)
-**Real-time form validation with reactive feedback**
+**Component-based form with reactive validation and state management**
 
-- ✅ Debounced input validation
+- ✅ Component architecture with lifecycle hooks
+- ✅ Reactive form validation with signals
 - ✅ Cross-field validation (password confirmation)
-- ✅ Visual feedback with color-coded fields
-- ✅ Form-wide state management
-- ✅ Complex validation rules
+- ✅ State management with framework stores
+- ✅ Custom validation components
+- ✅ Form submission handling
+- ✅ Error boundary implementation
 
-**Key Learning**: How to create responsive forms with immediate user feedback using reactive streams.
+**Framework Features**: Components, reactive signals, state management, validation system
+**Key Learning**: Building robust forms using the RxHtmx component system and reactive validation patterns.
 
 ### 2. [Search with Autocomplete](./search/)
-**Interactive search with suggestions and real-time results**
+**Single-page application with routing and async data handling**
 
-- ✅ Debounced search queries
-- ✅ Autocomplete suggestions
-- ✅ Loading states and error handling
-- ✅ Click-to-select suggestions
-- ✅ Search performance metrics
+- ✅ Client-side routing with multiple views
+- ✅ Search components with reactive streams
+- ✅ Autocomplete with debouncing
+- ✅ Loading states and error boundaries
+- ✅ Route-based state management
+- ✅ Performance optimization patterns
+- ✅ SEO-friendly routing
 
-**Key Learning**: Implementing search UX patterns with reactive programming for optimal performance.
+**Framework Features**: Router system, components, async handling, performance optimization
+**Key Learning**: Creating performant search experiences with routing and component-based architecture.
 
 ### 3. [Real-time Chat](./chat/)
-**Simulated real-time chat application**
+**Full-featured chat application demonstrating advanced framework patterns**
 
-- ✅ Message streams and state management
-- ✅ Typing indicators
-- ✅ Multi-user simulation
-- ✅ Real-time UI updates
-- ✅ User switching and message ownership
+- ✅ Component composition and reusability
+- ✅ Real-time message state management
+- ✅ User authentication patterns
+- ✅ Route guards and protected routes
+- ✅ WebSocket integration patterns
+- ✅ Advanced signal composition
+- ✅ Performance monitoring
+- ✅ Responsive design components
 
-**Key Learning**: Managing complex application state and real-time interactions with RxJS.
+**Framework Features**: Full framework stack, WebSocket integration, authentication, route guards
+**Key Learning**: Building complex applications with the complete RxHtmx framework ecosystem.
 
 ## Running the Examples
 
-Each example is a standalone HTML file that can be opened directly in a web browser:
+Each example is a complete application built with the RxHtmx framework:
 
+### Development Setup
+```bash
+# Install the framework
+npm install rxhtmx
+# or
+bun install rxhtmx
+
+# Start the development server (with hot reload)
+npm run dev
+# or use the framework CLI
+rxhtmx dev --examples
+```
+
+### Production Build
+```bash
+# Build examples for production
+rxhtmx build examples/
+```
+
+### Direct Browser Access
+For quick exploration, examples can be opened directly:
 1. Navigate to the example directory
 2. Open `index.html` in your browser
-3. Interact with the application to see RxHtmx in action
+3. Interact with the full framework features
+
+## Framework Architecture Demonstrated
+
+### Component System
+```javascript
+// Modern component with lifecycle and state
+class TodoComponent extends Component {
+  constructor() {
+    super();
+    this.state = createSignal([]);
+  }
+  
+  onMount() {
+    // Component lifecycle
+    this.loadTodos();
+  }
+  
+  render() {
+    return `<div class="todo-app">${this.renderTodos()}</div>`;
+  }
+}
+```
+
+### Reactive State Management
+```javascript
+// Framework-integrated state store
+const appStore = createStore({
+  user: null,
+  notifications: [],
+  theme: 'light'
+});
+
+// Reactive selectors
+const user$ = appStore.select('user');
+const notifications$ = appStore.select('notifications');
+```
+
+### Client-Side Routing
+```javascript
+// Declarative routing with guards
+const routes = [
+  { path: '/', component: HomeComponent },
+  { path: '/chat', component: ChatComponent, guard: authGuard },
+  { path: '/profile/:id', component: ProfileComponent }
+];
+
+const router = createRouter(routes);
+```
 
 ## Example Features
 
-### Common Patterns Demonstrated
-
-- **Debouncing**: Preventing excessive API calls or validations
-- **Stream Composition**: Combining multiple reactive streams
-- **State Management**: Using BehaviorSubjects for application state
-- **Error Handling**: Graceful degradation and error recovery
-- **UI Binding**: Reactive DOM updates with `bindSignalToDom`
-
-### Code Structure
-
-Each example follows a similar structure:
-
-```javascript
-// 1. Create input streams
-const inputStream = createStream('#input').pipe(
-    debounceTime(300),
-    distinctUntilChanged()
-);
-
-// 2. Transform data
-const processedStream = inputStream.pipe(
-    map(transformData),
-    filter(validateData)
-);
-
-// 3. Bind to UI
-bindSignalToDom(processedStream, '#output', updateFunction);
-```
+### Core Framework Patterns
+- **Component Lifecycle**: Mount, update, unmount hooks
+- **Reactive Signals**: Framework-native reactivity system  
+- **State Management**: Centralized stores with selectors
+- **Client Routing**: SPA navigation with guards
+- **Error Boundaries**: Graceful error handling
+- **Performance**: Optimized rendering and updates
 
 ## Learning Path
 
-**Beginner**: Start with [Form Validation](./form-validation/) to understand basic reactive concepts.
+**Beginner**: Start with [Form Validation](./form-validation/) to understand the component system and reactive signals.
 
-**Intermediate**: Try [Search](./search/) to learn about async operations and user experience patterns.
+**Intermediate**: Explore [Search](./search/) to learn routing, async operations, and performance patterns.
 
-**Advanced**: Explore [Chat](./chat/) for complex state management and real-time interactions.
+**Advanced**: Master [Chat](./chat/) for complex state management, real-time features, and authentication.
 
-## Customization
+## Framework Integration
 
-All examples use mock data and simulated backends. You can easily adapt them to work with real APIs by:
+### Production Applications
+Each example can be extended into production applications:
 
-1. Replacing mock functions with actual HTTP calls
-2. Adding authentication and error handling
-3. Integrating with your backend services
-4. Adding more complex business logic
+1. **Enhanced Authentication**: Add OAuth, JWT, or session-based auth
+2. **Backend Integration**: Connect to REST APIs, GraphQL, or WebSocket services  
+3. **Testing Setup**: Unit tests with framework testing utilities
+4. **Deployment**: Production builds with optimization and bundling
+5. **Monitoring**: Performance tracking and error reporting
 
-## Browser Compatibility
+### Migration from Other Frameworks
+Examples include migration patterns from:
+- React to RxHtmx components
+- Angular to RxHtmx services and routing
+- Vue to RxHtmx reactivity and state
 
-Examples work in all modern browsers that support:
-- ES6 modules
-- Async/await
-- DOM APIs
-- CSS Grid/Flexbox
+## Browser Support & Performance
+
+### Modern Browser Features
+- ES2020+ module system
+- Web Components API
+- Modern CSS features (Grid, Custom Properties)
+- Performance Observer API
+- Service Workers (for PWA examples)
+
+### Performance Optimizations
+- Component-level code splitting
+- Reactive rendering optimizations
+- Memory-efficient signal management
+- Bundle size optimization
+- Progressive loading patterns
+
+## Development Tools
+
+### Framework CLI Commands
+```bash
+# Create new example
+rxhtmx create example my-example
+
+# Development with hot reload
+rxhtmx dev examples/my-example
+
+# Production build
+rxhtmx build examples/my-example
+
+# Run tests
+rxhtmx test examples/my-example
+```
+
+### Developer Experience
+- Hot module replacement
+- TypeScript support
+- Framework DevTools browser extension
+- Performance profiling
+- Component inspector
 
 ## Next Steps
 
-After exploring these examples, check out:
-- [Documentation](../docs/) for detailed API reference
-- [Advanced Patterns](../docs/advanced.md) for complex use cases
-- Create your own examples and contribute back to the project!
+After mastering these examples:
 
-Each example includes detailed comments explaining the reactive patterns and RxHtmx usage. Feel free to modify and experiment with the code to deepen your understanding!
+1. **[Framework Documentation](../docs/)** - Complete API reference and guides
+2. **[Advanced Patterns](../docs/advanced.md)** - Complex use cases and optimizations  
+3. **[Migration Guide](../docs/migration.md)** - Moving from other frameworks
+4. **[Best Practices](../docs/best-practices.md)** - Production-ready patterns
+5. **[Community Examples](https://github.com/rxhtmx/examples)** - Real-world applications
+
+## Contributing Examples
+
+We welcome community examples! Please:
+1. Follow the established patterns and documentation style
+2. Include comprehensive comments and README
+3. Demonstrate specific framework features or use cases
+4. Add tests and performance benchmarks where applicable
+
+Each example serves as both a learning tool and a reference implementation for building production applications with the RxHtmx framework.

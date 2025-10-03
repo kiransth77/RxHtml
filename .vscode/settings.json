@@ -1,0 +1,46 @@
+{
+    "files.associations": {
+        "*.html": "html"
+    },
+    "html.format.indentInnerHtml": true,
+    "html.format.wrapLineLength": 120,
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.CustomBrowser": "chrome",
+    "liveServer.settings.donotShowInfoMsg": true,
+    "liveServer.settings.root": "/",
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/bun.lock": false
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bun.lock": true
+    },
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    },
+    "html.suggest.html5": true,
+    "css.lint.unknownAtRules": "ignore",
+    "testing.automaticallyOpenPeekView": "never",
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.javascript.unmapMissingSources": true,
+    "files.defaultLanguage": "javascript",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBorder": "#007bff",
+        "activityBar.activeBackground": "#007bff20"
+    },
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 120
+}

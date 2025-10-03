@@ -1,93 +1,377 @@
-# RxHtmx Documentation
+# RxHtmx Framework Documentation
+
+Complete documentation for the RxHtmx reactive frontend framework.
 
 ## Table of Contents
 
-1. [Getting Started](#getting-started)
-2. [Core Concepts](#core-concepts)
-3. [API Reference](#api-reference)
-4. [Examples](#examples)
-5. [Best Practices](#best-practices)
-6. [Troubleshooting](#troubleshooting)
+1. [Getting Started](getting-started.md) - Installation and basic usage
+2. [Framework Architecture](advanced.md) - Deep dive into framework design
+3. [API Reference](#api-reference) - Complete API documentation
+4. [Examples](../examples/README.md) - Sample applications and tutorials
+5. [Build System](../build/README.md) - Development and production builds
+6. [CLI Tools](../cli/README.md) - Command-line interface
+7. [Debugging Guide](debugging-troubleshooting.md) - Troubleshooting help
 
-## Getting Started
+## Framework Overview
 
-RxHtmx is a reactive library that bridges RxJS and HTMX, enabling you to create reactive, server-driven applications with minimal complexity.
+RxHtmx Framework is a complete reactive frontend framework that provides:
 
-### Prerequisites
+- **🔄 Enhanced Signal System**: Modern reactivity with signals, computed values, and effects
+- **🧩 Component Architecture**: Full component lifecycle with props and templates
+- **🛣️ Client-Side Router**: SPA routing with history API and guards
+- **📦 State Management**: Advanced store with actions, mutations, and middleware
+- **⚡ Build System**: Development server with HMR and production bundler
+- **🔧 CLI Tools**: Project scaffolding and development commands
 
-- Basic knowledge of JavaScript
-- Familiarity with RxJS concepts (Observables, Subjects)
-- Understanding of HTMX for server-driven UI updates
+## Quick Start
 
 ### Installation
 
 ```bash
-# Using Bun
-bun add rxhtmx rxjs htmx.org
+# Create new project (recommended)
+npx rxhtmx create my-app
+cd my-app
+npm run dev
 
-# Using npm
-npm install rxhtmx rxjs htmx.org
-
-# Using yarn
-yarn add rxhtmx rxjs htmx.org
+# Or add to existing project
+npm install rxhtmx
 ```
 
-### Quick Start
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <script type="module">
-        import { createStream, integrateHtmxWithSignals } from './path/to/rxhtmx.js';
-        
-        // Create a reactive stream from an input
-        const inputStream = createStream('#user-input');
-        inputStream.subscribe(value => console.log('Input:', value));
-        
-        // Listen to HTMX events
-        const htmxSignal = integrateHtmxWithSignals();
-        htmxSignal.subscribe(event => console.log('HTMX Event:', event));
-    </script>
-</head>
-<body>
-    <input id="user-input" type="text" placeholder="Type something...">
-    <button hx-get="/api/data" hx-target="#result">Load Data</button>
-    <div id="result"></div>
-</body>
-</html>
-```
-
-## Core Concepts
-
-### Reactive Streams
-
-RxHtmx creates RxJS streams from DOM elements, allowing you to react to user interactions in a functional, declarative way.
+### Basic Example
 
 ```javascript
-import { createStream } from 'rxhtmx';
+import { defineComponent, signal } from 'rxhtmx';
 
-const stream = createStream('#my-input');
-stream.subscribe(value => {
-    // React to input changes
-    console.log('User typed:', value);
+const Counter = defineComponent({
+  name: 'Counter',
+  setup() {
+    const count = signal(0);
+    const increment = () => count.value++;
+    
+    return { count, increment };
+  },
+  template: `
+    <div>
+      <span>Count: {{count}}</span>
+      <button @click="increment">+</button>
+    </div>
+  `
+## API Reference
+
+### Core Signal System
+
+#### `signal(initialValue)`
+Creates a reactive signal that can hold and emit values.
+
+```javascript
+const count = signal(0);
+count.value = 5; // Update value
+count.subscribe(val => console.log(val)); // Subscribe to changes
+```
+
+#### `computed(fn)`
+Creates a computed signal that automatically updates when dependencies change.
+
+```javascript
+const count = signal(0);
+const doubled = computed(() => count.value * 2);
+```
+
+#### `effect(fn, options?)`
+Creates a side effect that runs when dependencies change.
+
+```javascript
+effect(() => {
+  console.log('Count:', count.value);
 });
 ```
 
-### HTMX Integration
-
-HTMX events are converted into reactive streams, enabling you to respond to server interactions using RxJS operators.
+#### `batch(fn)`
+Batches multiple signal updates to prevent excessive re-computations.
 
 ```javascript
-import { integrateHtmxWithSignals } from 'rxhtmx';
+batch(() => {
+  signal1.value = 10;
+  signal2.value = 20;
+});
+```
 
+### Component System
+
+#### `defineComponent(options)`
+Defines a reusable component with lifecycle and reactivity.
+
+```javascript
+const MyComponent = defineComponent({
+  name: 'MyComponent',
+  props: {
+    title: { type: String, required: true }
+  },
+  setup(props) {
+    const state = signal('initial');
+    return { state };
+  },
+  template: '<div>{{title}}: {{state}}</div>'
+});
+```
+
+#### `createComponent(definition, props?)`
+Creates a component instance from a definition.
+
+```javascript
+const instance = createComponent(MyComponent, { title: 'Hello' });
+instance.mount('#app');
+```
+
+### Router System
+
+#### `createRouter(options)`
+Creates a client-side router for single-page applications.
+
+```javascript
+import { createRouter } from 'rxhtmx/router';
+
+const router = createRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/user/:id', component: User }
+  ]
+});
+```
+
+### State Management
+
+#### `createStore(options)`
+Creates a centralized state store with mutations, actions, and getters.
+
+```javascript
+import { createStore } from 'rxhtmx/state';
+
+const store = createStore({
+  state: { count: 0 },
+  mutations: {
+    increment: (state) => state.count++
+  },
+  actions: {
+    async fetchData({ commit }) {
+      const data = await api.getData();
+      commit('setData', data);
+    }
+  },
+  getters: {
+    doubleCount: (state) => state.count * 2
+  }
+});
+```
+
+### Legacy RxJS Integration
+
+For backwards compatibility, the original RxJS integration is preserved:
+
+#### `createStream(selector)`
+Creates an RxJS stream from DOM elements.
+
+```javascript
+const inputStream = createStream('#my-input');
+inputStream.subscribe(value => console.log(value));
+```
+
+#### `integrateHtmxWithSignals()`
+Creates a stream of HTMX events.
+
+```javascript
 const htmxSignal = integrateHtmxWithSignals();
-htmxSignal
-    .filter(event => event.type === 'afterSwap')
-    .subscribe(event => {
-        console.log('Content updated:', event.detail);
-    });
+htmxSignal.subscribe(event => console.log('HTMX event:', event.type));
+```
+
+#### `bindSignalToDom(signal, selector, updateFn)`
+Binds an RxJS signal to DOM updates.
+
+```javascript
+bindSignalToDom(dataStream, '#output', (element, value) => {
+  element.textContent = value;
+});
+```
+
+## Framework Architecture
+
+### System Overview
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Signal System │    │  Component Sys  │
+│   • Reactivity  │◄──►│  • Lifecycle    │
+│   • Computed    │    │  • Templates    │
+│   • Effects     │    │  • Props        │
+└─────────────────┘    └─────────────────┘
+         ▲                       ▲
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│   Router System │    │  State System   │
+│   • Navigation  │◄──►│  • Store        │
+│   • Guards      │    │  • Actions      │
+│   • History     │    │  • Middleware   │
+└─────────────────┘    └─────────────────┘
+```
+
+### Data Flow
+
+1. **User Interaction** → Component Event Handler
+2. **Event Handler** → State Mutation or Router Navigation
+3. **State Change** → Signal Updates
+4. **Signal Updates** → Component Re-render
+5. **Component Re-render** → DOM Updates
+
+## Best Practices
+
+### Component Design
+
+```javascript
+// ✅ Good: Single responsibility
+const UserAvatar = defineComponent({
+  name: 'UserAvatar',
+  props: {
+    user: { type: Object, required: true },
+    size: { type: String, default: 'medium' }
+  },
+  setup(props) {
+    const imageUrl = computed(() => 
+      props.user.avatar || '/default-avatar.png'
+    );
+    
+    return { imageUrl };
+  }
+});
+
+// ❌ Avoid: Too many responsibilities
+const UserEverything = defineComponent({
+  // Handles user data, profile editing, notifications, etc.
+});
+```
+
+### State Management
+
+```javascript
+// ✅ Good: Normalized state structure
+const store = createStore({
+  state: {
+    users: {},
+    posts: {},
+    currentUser: null
+  },
+  
+  mutations: {
+    setUser: (state, user) => {
+      state.users[user.id] = user;
+    }
+  }
+});
+
+// ❌ Avoid: Nested, denormalized state
+const badStore = createStore({
+  state: {
+    currentUser: {
+      posts: [
+        { comments: [...] }
+      ]
+    }
+  }
+});
+```
+
+### Signal Usage
+
+```javascript
+// ✅ Good: Computed for derived state
+const fullName = computed(() => `${firstName.value} ${lastName.value}`);
+
+// ❌ Avoid: Manual updates for derived state
+effect(() => {
+  fullName.value = `${firstName.value} ${lastName.value}`;
+});
+```
+
+## Migration Guide
+
+### From Legacy RxHtmx
+
+The original RxJS integration continues to work:
+
+```javascript
+// Legacy (still works)
+import { createStream, integrateHtmxWithSignals } from 'rxhtmx';
+
+// New framework approach
+import { defineComponent, signal } from 'rxhtmx';
+```
+
+### From Other Frameworks
+
+#### From Vue.js
+
+```javascript
+// Vue.js
+export default {
+  data() {
+    return { count: 0 };
+  },
+  computed: {
+    doubled() { return this.count * 2; }
+  }
+}
+
+// RxHtmx
+const MyComponent = defineComponent({
+  setup() {
+    const count = signal(0);
+    const doubled = computed(() => count.value * 2);
+    return { count, doubled };
+  }
+});
+```
+
+#### From React
+
+```javascript
+// React
+function Counter() {
+  const [count, setCount] = useState(0);
+  const doubled = useMemo(() => count * 2, [count]);
+  
+  return <div>{count}</div>;
+}
+
+// RxHtmx
+const Counter = defineComponent({
+  setup() {
+    const count = signal(0);
+    const doubled = computed(() => count.value * 2);
+    
+    return { count, doubled };
+  },
+  template: '<div>{{count}}</div>'
+});
+```
+
+## Resources
+
+- **[Getting Started Guide](getting-started.md)** - Step-by-step tutorial
+- **[Advanced Patterns](advanced.md)** - Complex use cases and patterns
+- **[Example Applications](../examples/README.md)** - Complete sample apps
+- **[Build System Guide](../build/README.md)** - Development and production builds
+- **[CLI Documentation](../cli/README.md)** - Command-line tools
+- **[Debugging Guide](debugging-troubleshooting.md)** - Troubleshooting help
+
+## Community
+
+- **GitHub**: [RxHtmx Framework Repository](https://github.com/kiransth77/RxHtml)
+- **Issues**: Report bugs and request features
+- **Discussions**: Ask questions and share ideas
+
+---
+
+**RxHtmx Framework** - A complete reactive frontend framework built for modern web development! 🚀
 ```
 
 ### Signal Binding

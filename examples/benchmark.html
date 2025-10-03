@@ -1,110 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signal Benchmark</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; }
-    h1 { color: #007bff; }
-    .results { margin-top: 20px; background: #f8f9fa; padding: 20px; border-radius: 8px; }
-    label { display: block; margin: 10px 0 5px; }
-    input[type=number] { width: 100px; padding: 5px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    .stat { margin: 8px 0; }
-  </style>
-</head>
-<body>
-  <h1>Signal Performance & Memory Benchmark</h1>
-  <label for="signal-count">Number of signals to create:</label>
-  <input type="number" id="signal-count" value="10000" min="1" max="1000000">
-  <label for="value-type">Signal value type:</label>
-  <select id="value-type">
-    <option value="primitive">Primitive (number)</option>
-    <option value="object">Non-primitive (JSON object)</option>
-  </select>
-  <button id="run-benchmark">Run Benchmark</button>
-  <div class="results" id="results"></div>
-  <script type="module">
-    // Minimal signal implementation (same as in src/signal.js)
-    function signal(initialValue) {
-      let _value = initialValue;
-      const subscribers = new Set();
-      return {
-        get value() { return _value; },
-        set value(v) {
-          if (_value !== v) {
-            _value = v;
-            subscribers.forEach(fn => fn(_value));
-          }
-        },
-        subscribe(fn) {
-          subscribers.add(fn);
-          fn(_value);
-          return () => subscribers.delete(fn);
-        }
-      };
-    }
 
-    function formatBytes(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Benchmark</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+      }
 
-    document.getElementById('run-benchmark').onclick = async function() {
-      const count = parseInt(document.getElementById('signal-count').value, 10);
-      const valueType = document.getElementById('value-type').value;
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = 'Running benchmark...';
+      h1 {
+        color: #007bff;
+      }
 
-      // Helper to create value
-      function makeValue(i) {
-        if (valueType === 'primitive') return i;
-        // Non-primitive: moderately complex object
+      .results {
+        margin-top: 20px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
+
+      input[type=number] {
+        width: 100px;
+        padding: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        margin-top: 10px;
+      }
+
+      .stat {
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Signal Performance & Memory Benchmark</h1>
+    <label for="signal-count">Number of signals to create:</label>
+    <input type="number" id="signal-count" value="10000" min="1" max="1000000">
+    <label for="value-type">Signal value type:</label>
+    <select id="value-type">
+      <option value="primitive">Primitive (number)</option>
+      <option value="object">Non-primitive (JSON object)</option>
+    </select>
+    <button id="run-benchmark">Run Benchmark</button>
+    <div class="results" id="results"></div>
+    <script type="module">
+      // Minimal signal implementation (same as in src/signal.js)
+      function signal(initialValue) {
+        let _value = initialValue;
+        const subscribers = new Set();
         return {
-          id: i,
-          name: 'Item ' + i,
-          data: [i, i + 1, i + 2],
-          meta: { created: Date.now(), flag: i % 2 === 0 }
+          get value() { return _value; },
+          set value(v) {
+            if (_value !== v) {
+              _value = v;
+              subscribers.forEach(fn => fn(_value));
+            }
+          },
+          subscribe(fn) {
+            subscribers.add(fn);
+            fn(_value);
+            return () => subscribers.delete(fn);
+          }
         };
       }
 
-      // Memory before
-      let memoryBefore = window.performance && window.performance.memory ? window.performance.memory.usedJSHeapSize : null;
-
-      // Create signals
-      const t0 = performance.now();
-      const signals = [];
-      for (let i = 0; i < count; i++) {
-        signals.push(signal(makeValue(i)));
+      function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
       }
-      const t1 = performance.now();
 
-      // Subscribe to all signals
-      let sum = 0;
-      const t2 = performance.now();
-      const unsubs = signals.map(sig => sig.subscribe(v => {
-        // For primitive, sum; for object, sum id
-        if (valueType === 'primitive') sum += v;
-        else if (v && typeof v === 'object') sum += v.id || 0;
-      }));
-      const t3 = performance.now();
+      document.getElementById('run-benchmark').onclick = async function () {
+        const count = parseInt(document.getElementById('signal-count').value, 10);
+        const valueType = document.getElementById('value-type').value;
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = 'Running benchmark...';
 
-      // Update all signals
-      const t4 = performance.now();
-      for (let i = 0; i < count; i++) {
-        signals[i].value = makeValue(i * 2);
-      }
-      const t5 = performance.now();
+        // Helper to create value
+        function makeValue(i) {
+          if (valueType === 'primitive') return i;
+          // Non-primitive: moderately complex object
+          return {
+            id: i,
+            name: 'Item ' + i,
+            data: [i, i + 1, i + 2],
+            meta: { created: Date.now(), flag: i % 2 === 0 }
+          };
+        }
 
-      // Memory after
-      let memoryAfter = window.performance && window.performance.memory ? window.performance.memory.usedJSHeapSize : null;
+        // Memory before
+        let memoryBefore = window.performance && window.performance.memory ? window.performance.memory.usedJSHeapSize : null;
 
-      // Cleanup
-      unsubs.forEach(unsub => unsub());
+        // Create signals
+        const t0 = performance.now();
+        const signals = [];
+        for (let i = 0; i < count; i++) {
+          signals.push(signal(makeValue(i)));
+        }
+        const t1 = performance.now();
 
-      resultsDiv.innerHTML = `
+        // Subscribe to all signals
+        let sum = 0;
+        const t2 = performance.now();
+        const unsubs = signals.map(sig => sig.subscribe(v => {
+          // For primitive, sum; for object, sum id
+          if (valueType === 'primitive') sum += v;
+          else if (v && typeof v === 'object') sum += v.id || 0;
+        }));
+        const t3 = performance.now();
+
+        // Update all signals
+        const t4 = performance.now();
+        for (let i = 0; i < count; i++) {
+          signals[i].value = makeValue(i * 2);
+        }
+        const t5 = performance.now();
+
+        // Memory after
+        let memoryAfter = window.performance && window.performance.memory ? window.performance.memory.usedJSHeapSize : null;
+
+        // Cleanup
+        unsubs.forEach(unsub => unsub());
+
+        resultsDiv.innerHTML = `
         <div class="stat"><b>Signals created:</b> ${count}</div>
         <div class="stat"><b>Value type:</b> ${valueType === 'primitive' ? 'Primitive (number)' : 'Non-primitive (JSON object)'}</div>
         <div class="stat"><b>Time to create signals:</b> ${(t1 - t0).toFixed(2)} ms</div>
@@ -115,7 +146,8 @@
         <div class="stat"><b>Memory after:</b> ${memoryAfter !== null ? formatBytes(memoryAfter) : 'N/A'}</div>
         <div class="stat"><b>Memory delta:</b> ${memoryBefore !== null && memoryAfter !== null ? formatBytes(memoryAfter - memoryBefore) : 'N/A'}</div>
       `;
-    };
-  </script>
-</body>
+      };
+    </script>
+  </body>
+
 </html>
