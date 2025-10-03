@@ -17,7 +17,9 @@ RxHtmx has evolved from a simple RxJS+HTMX integration library into a **complete
 
 ## ✅ Test Status
 
-**Integration Tests: 9/9 PASSING** ✅
+**Integration Tests: 9/9 PASSING** ✅  
+**Standalone Tests: 5/5 PASSING** ✅  
+**Total: 14/14 PASSING** 🎯
 
 - ✅ Signal + Component Integration
 - ✅ Props & Reactive Updates  
@@ -28,6 +30,8 @@ RxHtmx has evolved from a simple RxJS+HTMX integration library into a **complete
 - ✅ Complex State Updates
 - ✅ Error Boundaries
 - ✅ Memory Management
+- ✅ HTMX Signal Integration (Standalone)
+- ✅ CreateStream Functionality (Standalone)
 
 All core framework functionality is tested and working perfectly.
 

@@ -2,11 +2,15 @@
 
 ## 🧪 Test Status Overview
 
-**Integration Tests: 9/9 PASSING** ✅
+**Integration Tests: 9/9 PASSING** ✅  
+**Standalone Tests: 5/5 PASSING** ✅  
+**Total: 14/14 PASSING** 🎯
 
 All core framework functionality has been thoroughly tested and validated. This document provides comprehensive information about the testing framework, debugging approaches, and resolution of critical issues.
 
 ## 🎯 Test Categories
+
+### Core Framework Integration Tests (9/9 Passing)
 
 ### 1. Signal + Component Integration ✅
 **Purpose**: Validate reactive updates and computed values between signals and components
@@ -94,6 +98,26 @@ All core framework functionality has been thoroughly tested and validated. This 
 - Signal subscription cleanup
 - Router listener removal
 - Store subscription management
+
+### Standalone Legacy Tests (5/5 Passing)
+
+### 10. CreateStream Functionality ✅
+**Purpose**: Validate original RxJS stream creation from DOM elements
+
+**Test Coverage**:
+- Stream creation for existing elements
+- Warning system for missing elements  
+- Multiple value handling and event propagation
+- RxJS Subject integration
+
+### 11. HTMX Signal Integration ✅
+**Purpose**: Test original HTMX integration with signal system
+
+**Test Coverage**:
+- HTMX event emission as signals
+- DOM element binding with signal updates
+- Event-driven reactivity patterns
+- Legacy compatibility preservation
 
 ## 🔧 Testing Framework Setup
 
@@ -259,7 +283,63 @@ function evaluateExpression(expr, context) {
 
 **Result**: Correct template rendering with reactive expressions
 
-## 📊 Testing Best Practices
+### Issue 5: Console Environment Conflicts
+**Symptoms**:
+- Tests passing individually but failing when run together
+- "console.log is not a function" errors in multi-file test runs
+- JSDOM environment conflicts between test files
+
+**Root Cause**:
+Different test files overriding global console object, causing conflicts
+
+**Solution Applied**:
+```javascript
+// tests/integration.test.js - Console environment fix
+// Preserve console before any global assignments
+const originalConsole = console;
+
+// Restore console after DOM setup
+global.console = originalConsole;
+global.window.console = originalConsole;
+
+// Fallback console implementation for edge cases
+if (typeof console === 'undefined' || !console.log) {
+  const customConsole = {
+    log: (...args) => process.stdout.write(args.join(' ') + '\n'),
+    warn: (...args) => process.stderr.write('WARN: ' + args.join(' ') + '\n'),
+    error: (...args) => process.stderr.write('ERROR: ' + args.join(' ') + '\n')
+  };
+  global.console = customConsole;
+}
+```
+
+**Result**: Stable test environment across all test files (14/14 passing)
+
+## 📊 Testing Commands
+
+### Full Test Suite
+```bash
+# Run all tests (recommended)
+bun test tests/createStream.standalone.test.js tests/htmxSignalIntegration.standalone.test.js tests/integration.test.js
+
+# Use the configured task for convenience  
+bun run test
+```
+
+### Individual Test Categories
+```bash
+# Run integration tests only (9 tests)
+bun test tests/integration.test.js
+
+# Run standalone tests only (5 tests)
+bun test tests/createStream.standalone.test.js tests/htmxSignalIntegration.standalone.test.js
+
+# Run with verbose output for debugging
+bun test --verbose tests/integration.test.js
+
+# Watch mode for development
+bun test --watch tests/
+```
 
 ### Test Structure
 ```javascript
