@@ -25,7 +25,7 @@
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
-    "htmx.org": "^1.9.2",
+    "htmx.org": "^2.0.8",
     "jsdom": "^26.1.0",
     "rxjs": "^7.8.1"
   },
