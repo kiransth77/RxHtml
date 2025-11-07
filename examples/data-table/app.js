@@ -9,6 +9,10 @@ import { signal, computed, effect } from '../../src/index.js';
 // Data Generation
 // ============================================================================
 
+// NOTE: Math.random() is used here for demo data generation only.
+// In production code handling sensitive data, use crypto.getRandomValues()
+// or a secure random number generator.
+
 const statuses = ['active', 'inactive', 'pending'];
 const departments = ['Engineering', 'Marketing', 'Sales', 'Support', 'HR'];
 const names = [
