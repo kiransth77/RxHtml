@@ -49,6 +49,7 @@ npm install rxhtmx
 ### Importing with Types
 
 ```typescript
+// All exports are available from the main 'rxhtmx' module
 import { 
   signal, 
   computed, 
@@ -59,6 +60,11 @@ import {
 } from 'rxhtmx';
 
 // All imports are fully typed!
+
+// Note: In documentation examples, you may see paths like:
+// - 'rxhtmx/router' 
+// - 'rxhtmx/state'
+// These are conceptual - in actual code, import from 'rxhtmx' directly
 ```
 
 ## Signals with Types
@@ -345,7 +351,7 @@ const ProductList = createListComponent<Product>();
 ### Typed Store
 
 ```typescript
-import { createStore, Store, StoreOptions } from 'rxhtmx/state';
+import { createStore, Store, StoreOptions } from 'rxhtmx';
 
 // Define state interface
 interface AppState {
@@ -453,7 +459,7 @@ const completed: Todo[] = store.getters.completedTodos;
 ### Typed Routes
 
 ```typescript
-import { createRouter, Router, RouteLocation } from 'rxhtmx/router';
+import { createRouter, Router, RouteLocation } from 'rxhtmx';
 
 // Define route names as constants for type safety
 const ROUTE_NAMES = {
@@ -526,7 +532,7 @@ const UserComponent = defineComponent({
 ### Typed Navigation Guards
 
 ```typescript
-import { NavigationGuard, NavigationGuardReturn } from 'rxhtmx/router';
+import { NavigationGuard, NavigationGuardReturn } from 'rxhtmx';
 
 const requireAuth: NavigationGuard = (to, from): NavigationGuardReturn => {
   const isAuthenticated = authStore.state.isAuthenticated;

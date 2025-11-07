@@ -3,8 +3,8 @@
  * Provides client-side routing capabilities
  */
 
-import { Component, ComponentInstance } from './component';
-import { Signal } from './signal';
+import { Component, ComponentInstance } from '../core/component';
+import { Signal } from '../core/signal';
 
 /**
  * Route location object
