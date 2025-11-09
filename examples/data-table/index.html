@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Table Example - RxHtml</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sort-icon {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+        .sort-icon.active {
+            opacity: 1;
+            font-weight: bold;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .badge.success {
+            background-color: #10b981;
+            color: white;
+        }
+        .badge.warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .badge.danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .table-row {
+            transition: background-color 0.2s;
+        }
+        .table-row:hover {
+            background-color: #f3f4f6;
+        }
+        .table-row.selected {
+            background-color: #dbeafe;
+        }
+        .loading-spinner {
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .highlight {
+            background-color: #fef3c7;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">
+                📊 Interactive Data Table
+            </h1>
+            
+            <div class="text-sm text-gray-600 mb-4">
+                <p>This example demonstrates:</p>
+                <ul class="list-disc list-inside mt-2">
+                    <li>Real-time sorting and filtering</li>
+                    <li>Pagination with configurable page size</li>
+                    <li>Simulated live data updates every 3 seconds</li>
+                    <li>Row selection for batch operations</li>
+                    <li>Responsive design with Tailwind CSS</li>
+                </ul>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loading" class="flex items-center justify-center py-12">
+                <div class="loading-spinner mr-2"></div>
+                <span class="text-gray-600">Loading data...</span>
+            </div>
+
+            <!-- Main content (will be populated by JavaScript) -->
+            <div id="content" class="hidden">
+                <!-- Search bar -->
+                <div class="mb-4 flex items-center justify-between">
+                    <div class="flex-1 max-w-md">
+                        <input 
+                            type="text" 
+                            id="search" 
+                            placeholder="Search across all columns..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            id="clearSelection"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                            disabled
+                        >
+                            Clear Selection (<span id="selectedCount">0</span>)
+                        </button>
+                        <button 
+                            id="refreshData"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats bar -->
+                <div class="mb-4 flex items-center gap-4 text-sm text-gray-600">
+                    <span>Total Records: <strong id="totalRecords">0</strong></span>
+                    <span>Filtered: <strong id="filteredRecords">0</strong></span>
+                    <span>Selected: <strong id="selectedRecords">0</strong></span>
+                    <span class="ml-auto">
+                        Last Update: <span id="lastUpdate" class="font-mono">--:--:--</span>
+                    </span>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr id="tableHeader">
+                                <th class="px-4 py-3 text-left">
+                                    <input type="checkbox" id="selectAll" class="rounded" />
+                                </th>
+                                <!-- Headers will be inserted here -->
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">Rows per page:</label>
+                        <select id="pageSize" class="px-3 py-1 border border-gray-300 rounded">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <button 
+                            id="prevPage"
+                            class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span class="text-sm text-gray-600">
+                            Page <strong id="currentPage">1</strong> of <strong id="totalPages">1</strong>
+                        </span>
+                        <button 
+                            id="nextPage"
+                            class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>Built with RxHtml Framework | 
+                <a href="../../docs/getting-started.md" class="text-blue-600 hover:underline">Documentation</a> | 
+                <a href="https://github.com/kiransth77/RxHtml" class="text-blue-600 hover:underline">GitHub</a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

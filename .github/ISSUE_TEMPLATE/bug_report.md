@@ -1,40 +1,84 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help us improve RxHtml
 title: '[BUG] '
 labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Bug Description
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Clear and concise description of the bug:**
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## To Reproduce
 
-**Environment:**
- - OS: [e.g. Windows, macOS, Linux]
- - Browser: [e.g. Chrome, Firefox, Safari]
- - Version: [e.g. 22]
- - RxHtmx Version: [e.g. 1.0.0]
+**Steps to reproduce the behavior:**
+1. 
+2. 
+3. 
+4. 
 
-**Additional context**
-Add any other context about the problem here.
-
-**Code Sample**
-If applicable, provide a minimal code sample that reproduces the issue:
+**Minimal code example:**
 
 ```javascript
-// Your code here
+// Please provide a minimal, reproducible code example
+import { signal, effect } from 'rxhtmx';
+
+const count = signal(0);
+// ... your code that reproduces the issue
 ```
+
+## Expected Behavior
+
+**What you expected to happen:**
+
+
+## Actual Behavior
+
+**What actually happened:**
+
+
+## Screenshots
+
+If applicable, add screenshots or error messages:
+
+
+## Environment
+
+**Please complete the following information:**
+
+- **RxHtml Version:** [e.g. 2.0.0]
+- **Browser:** [e.g. Chrome 120, Firefox 121, Safari 17]
+- **OS:** [e.g. Windows 11, macOS 14, Ubuntu 22.04]
+- **Node Version:** [e.g. 18.17.0] (if applicable)
+- **Build Tool:** [e.g. Vite 4.5.0, Webpack 5] (if applicable)
+
+## Additional Context
+
+**Any other context about the problem:**
+
+
+## Possible Solution
+
+**If you have suggestions on how to fix this:**
+
+
+## Related Issues
+
+**Link to related issues or discussions:**
+
+
+---
+
+### Checklist
+
+Before submitting, please ensure:
+
+- [ ] I have searched for existing issues
+- [ ] I have provided a minimal code example
+- [ ] I have included environment details
+- [ ] I have read the [documentation](https://github.com/kiransth77/RxHtml/tree/main/docs)
+
+**Thank you for helping improve RxHtml! 🚀**
