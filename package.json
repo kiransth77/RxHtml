@@ -24,7 +24,10 @@
     "package": "npm pack",
     "docs:build": "node scripts/build-docs.js",
     "docs:serve": "python -m http.server 8080 --directory docs-dist",
-    "release": "node scripts/release.js",
+    "analyze": "vite build --mode analyze",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
     "preversion": "bun run test && bun run lint",
     "version": "bun run build && git add dist/",
     "postversion": "git push && git push --tags",
@@ -53,7 +56,9 @@
     "rollup": "^4.8.0",
     "terser": "^5.24.0",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0"
+    "lint-staged": "^15.2.0",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "standard-version": "^9.5.0"
   },
   "keywords": [
     "rxjs",

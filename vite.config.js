@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import fs from 'fs';
+import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // Root directory for serving files
   root: './',
 
@@ -122,7 +125,40 @@ export default defineConfig({
         }
       },
     },
-  ],
+    // Framework enhanced error overlay
+    {
+      name: 'rxhtmx-error-overlay',
+      configureServer(server) {
+        server.ws.on('connection', () => {
+          // No-op; overlay pushes on errors
+        });
+        server.middlewares.use((req, res, next) => {
+          next();
+        });
+      },
+      handleHotUpdate(ctx) {
+        // Do nothing here
+      },
+      transform(code, id) {
+        // Inject global error handler only once for entry files
+        if (/src\/index\.js$/.test(id)) {
+          const injection =
+            "\nif (import.meta.hot) {\n  window.__RXHTMX_ERRORS__ = window.__RXHTMX_ERRORS__ || [];\n  window.addEventListener('error', (e) => {\n    window.__RXHTMX_ERRORS__.push({ message: e.message, filename: e.filename, lineno: e.lineno });\n    if (document && !document.getElementById('__rxhtmx_error_overlay')) {\n      const el = document.createElement('div');\n      el.id = '__rxhtmx_error_overlay';\n      el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#300;color:#fdd;font-family:monospace;font-size:14px;z-index:99999;padding:8px;border-bottom:2px solid #900;max-height:50%;overflow:auto';\n      document.body.appendChild(el);\n    }\n    const overlay = document.getElementById('__rxhtmx_error_overlay');\n    if (overlay) {\n      overlay.innerHTML = '<strong>RxHtmx Error Overlay</strong><br>' + window.__RXHTMX_ERRORS__.map(err => err.message).join('<br>');\n    }\n  });\n}\n";
+          return code + injection;
+        }
+        return code;
+      },
+    },
+    // Bundle analyzer (enabled in analyze mode)
+    mode === 'analyze' &&
+      visualizer({
+        filename: './dist/stats.html',
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+        template: 'treemap', // sunburst, treemap, network
+      }),
+  ].filter(Boolean),
 
   // Optimize dependencies
   optimizeDeps: {
@@ -159,4 +195,4 @@ export default defineConfig({
 
   // Log level
   logLevel: 'info',
-});
+}));
