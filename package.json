@@ -1,9 +1,13 @@
 {
   "name": "rxhtmx",
   "version": "2.0.0",
+  "type": "module",
   "description": "A comprehensive reactive frontend framework with components, routing, state management, and RxJS integration.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "bin": {
+    "rxhtmx": "./cli/index.js"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && bun run build:browser",
@@ -23,12 +27,23 @@
     "release": "node scripts/release.js",
     "preversion": "bun run test && bun run lint",
     "version": "bun run build && git add dist/",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{html,md,json}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "htmx.org": "^1.9.2",
     "jsdom": "^26.1.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "commander": "^11.1.0"
   },
   "devDependencies": {
     "vite": "^4.5.0",
@@ -36,7 +51,9 @@
     "eslint": "^8.55.0",
     "prettier": "^3.1.0",
     "rollup": "^4.8.0",
-    "terser": "^5.24.0"
+    "terser": "^5.24.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
   },
   "keywords": [
     "rxjs",

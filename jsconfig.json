@@ -1,0 +1,77 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // Source map configuration
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "sourceRoot": "./src",
+    "mapRoot": "./",
+    "declaration": true,
+    "declarationMap": true,
+    // Path mapping for better navigation
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@core/*": ["src/core/*"],
+      "@router/*": ["src/router/*"],
+      "@store/*": ["src/store/*"],
+      "@state/*": ["src/state/*"],
+      "@utils/*": ["src/utils/*"],
+      "@cli/*": ["cli/*"]
+    },
+    // Type checking
+    "types": ["node", "vite/client"],
+    "typeRoots": ["./node_modules/@types", "./src"],
+    // Advanced options
+    "removeComments": false,
+    "preserveConstEnums": true
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "examples/**/*",
+    "scripts/**/*",
+    "cli/**/*",
+    "*.js",
+    "*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "lib",
+    "coverage",
+    "playwright-report",
+    "**/*.spec.js",
+    "**/*.test.js"
+  ],
+  "vscode": {
+    "preferences": {
+      "javascript.suggestionActions.enabled": true,
+      "javascript.validate.enable": true,
+      "javascript.suggest.autoImports": true,
+      "javascript.suggest.paths": true,
+      "javascript.suggest.completeFunctionCalls": true,
+      "javascript.updateImportsOnFileMove.enabled": "always",
+      "javascript.preferences.importModuleSpecifier": "relative",
+      "javascript.preferences.quoteStyle": "single"
+    }
+  }
+}
