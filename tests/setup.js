@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 
 // Set up a DOM environment for tests
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-    url: 'http://localhost:3000'
+  url: 'http://localhost:3000',
 });
 global.document = dom.window.document;
 global.window = dom.window;
@@ -16,16 +16,7 @@ global.navigator = dom.window.navigator;
 // Mock htmx globally before any other imports
 import mockHtmx from './mocks/htmx.js';
 
-// Override the module resolution for htmx.org
-const originalRequire = require;
-require = function(id) {
-    if (id === 'htmx.org') {
-        return mockHtmx;
-    }
-    return originalRequire.apply(this, arguments);
-};
-
-// Also set it globally
+// Set htmx globally
 global.htmx = mockHtmx;
 globalThis.htmx = mockHtmx;
 

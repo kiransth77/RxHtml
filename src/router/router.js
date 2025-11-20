@@ -3,6 +3,7 @@
 
 import { signal, computed } from '../core/signal.js';
 import { createComponent, mountComponent } from '../core/component.js';
+import { h } from '../core/dom.js';
 
 export class Router {
   constructor(options = {}) {
@@ -10,20 +11,20 @@ export class Router {
     this.mode = options.mode || 'history'; // 'history' or 'hash'
     this.base = options.base || '/';
     this.guards = options.guards || {};
-    
+
     // Reactive state
     this.currentRoute = signal(null);
     this.isReady = signal(false);
-    
+
     // Internal state
     this.currentComponent = null;
     this.container = null;
     this.beforeEachHooks = [];
     this.afterEachHooks = [];
-    
+
     this.init();
   }
-  
+
   init() {
     console.log('Router initialization started');
     // Set up event listeners
@@ -32,14 +33,14 @@ export class Router {
     } else {
       window.addEventListener('hashchange', this.handleHashChange.bind(this));
     }
-    
+
     // Initial route
     console.log('Handling initial route');
     this.handleRoute(this.getCurrentPath());
     this.isReady.value = true;
     console.log('Router initialization completed');
   }
-  
+
   getCurrentPath() {
     if (this.mode === 'history') {
       return window.location.pathname + window.location.search;
@@ -47,48 +48,51 @@ export class Router {
       return window.location.hash.slice(1) || '/';
     }
   }
-  
+
   handlePopState() {
     this.handleRoute(this.getCurrentPath());
   }
-  
+
   handleHashChange() {
     this.handleRoute(this.getCurrentPath());
   }
-  
+
   async handleRoute(path) {
     console.log(`Handling route: ${path}`);
     const route = this.matchRoute(path);
-    
+
     if (!route) {
       console.warn(`No route found for path: ${path}`);
       return;
     }
-    
+
     // Run before guards
     console.log('Running before guards');
-    const canNavigate = await this.runBeforeGuards(route, this.currentRoute.value);
+    const canNavigate = await this.runBeforeGuards(
+      route,
+      this.currentRoute.value
+    );
     if (!canNavigate) {
       console.log('Navigation cancelled by before guards');
       return;
     }
-    
+
     // Update current route
     const previousRoute = this.currentRoute.value;
     this.currentRoute.value = route;
     console.log(`Route updated to: ${route.path}`);
-    
+
     // Mount component
     if (route.component && this.container) {
       console.log('Mounting route component');
       this.mountRouteComponent(route);
     }
-    
+
     // Run after hooks
     console.log('Running after hooks');
     this.runAfterHooks(route, previousRoute);
   }
-  
+
   matchRoute(path) {
     for (const routeConfig of this.routes) {
       const match = this.matchPath(path, routeConfig.path);
@@ -98,26 +102,26 @@ export class Router {
           path,
           params: match.params,
           query: this.parseQuery(path),
-          fullPath: path
+          fullPath: path,
         };
       }
     }
     return null;
   }
-  
+
   matchPath(path, pattern) {
     // Remove query string for matching
     const cleanPath = path.split('?')[0];
-    
+
     // Convert pattern to regex
     const paramPattern = pattern.replace(/:([^/]+)/g, '([^/]+)');
     const regex = new RegExp(`^${paramPattern}$`);
-    
+
     const match = cleanPath.match(regex);
     if (!match) {
       return null;
     }
-    
+
     // Extract parameters
     const params = {};
     const paramNames = pattern.match(/:([^/]+)/g);
@@ -127,25 +131,25 @@ export class Router {
         params[paramName] = match[index + 1];
       });
     }
-    
+
     return { params };
   }
-  
+
   parseQuery(path) {
     const queryString = path.split('?')[1];
     if (!queryString) {
       return {};
     }
-    
+
     const query = {};
     queryString.split('&').forEach(param => {
       const [key, value] = param.split('=');
       query[decodeURIComponent(key)] = decodeURIComponent(value || '');
     });
-    
+
     return query;
   }
-  
+
   async runBeforeGuards(to, from) {
     // Global before hooks
     for (const hook of this.beforeEachHooks) {
@@ -154,10 +158,12 @@ export class Router {
         return false;
       }
     }
-    
+
     // Route-specific guards
     if (to.beforeEnter) {
-      const guards = Array.isArray(to.beforeEnter) ? to.beforeEnter : [to.beforeEnter];
+      const guards = Array.isArray(to.beforeEnter)
+        ? to.beforeEnter
+        : [to.beforeEnter];
       for (const guard of guards) {
         const result = await guard(to, from);
         if (result === false) {
@@ -165,10 +171,10 @@ export class Router {
         }
       }
     }
-    
+
     return true;
   }
-  
+
   runAfterHooks(to, from) {
     this.afterEachHooks.forEach(hook => {
       try {
@@ -178,23 +184,23 @@ export class Router {
       }
     });
   }
-  
+
   mountRouteComponent(route) {
     // Unmount previous component
     if (this.currentComponent) {
       this.currentComponent.unmount();
     }
-    
+
     // Mount new component
     if (route.component) {
       this.currentComponent = createComponent(route.component, {
         route,
-        router: this
+        router: this,
       });
       mountComponent(this.currentComponent, this.container);
     }
   }
-  
+
   // Navigation methods
   push(path) {
     if (this.mode === 'history') {
@@ -204,7 +210,7 @@ export class Router {
       window.location.hash = path;
     }
   }
-  
+
   replace(path) {
     if (this.mode === 'history') {
       window.history.replaceState(null, '', path);
@@ -213,19 +219,19 @@ export class Router {
       window.location.replace(`#${path}`);
     }
   }
-  
+
   go(delta) {
     window.history.go(delta);
   }
-  
+
   back() {
     window.history.back();
   }
-  
+
   forward() {
     window.history.forward();
   }
-  
+
   // Guard registration
   beforeEach(hook) {
     this.beforeEachHooks.push(hook);
@@ -236,7 +242,7 @@ export class Router {
       }
     };
   }
-  
+
   afterEach(hook) {
     this.afterEachHooks.push(hook);
     return () => {
@@ -246,15 +252,15 @@ export class Router {
       }
     };
   }
-  
+
   // Mount router to container
   mount(container) {
     if (typeof container === 'string') {
       container = document.querySelector(container);
     }
-    
+
     this.container = container;
-    
+
     // Mount current route if available
     if (this.currentRoute.value) {
       this.mountRouteComponent(this.currentRoute.value);
@@ -283,12 +289,12 @@ export const RouterLink = {
   props: {
     to: { type: String, required: true },
     replace: { type: Boolean, default: false },
-    tag: { type: String, default: 'a' }
+    tag: { type: String, default: 'a' },
   },
   setup(props, { slots }) {
     const router = getCurrentRouter();
-    
-    const navigate = (event) => {
+
+    const navigate = event => {
       event.preventDefault();
       if (props.replace) {
         router.replace(props.to);
@@ -296,15 +302,19 @@ export const RouterLink = {
         router.push(props.to);
       }
     };
-    
+
     return () => {
       const Tag = props.tag;
-      return h(Tag, {
-        href: props.to,
-        onClick: navigate
-      }, slots.default?.());
+      return h(
+        Tag,
+        {
+          href: props.to,
+          onClick: navigate,
+        },
+        slots.default?.()
+      );
     };
-  }
+  },
 };
 
 // Router view component
@@ -312,19 +322,19 @@ export const RouterView = {
   name: 'RouterView',
   setup() {
     const router = getCurrentRouter();
-    
+
     return () => {
       const route = router.currentRoute.value;
       if (!route || !route.component) {
         return null;
       }
-      
+
       return h(route.component, {
         route,
-        router
+        router,
       });
     };
-  }
+  },
 };
 
 // Current router instance
@@ -359,12 +369,12 @@ export function createRoutes(routes) {
 export function createWebHistory(base = '/') {
   return {
     mode: 'history',
-    base
+    base,
   };
 }
 
 export function createWebHashHistory() {
   return {
-    mode: 'hash'
+    mode: 'hash',
   };
 }

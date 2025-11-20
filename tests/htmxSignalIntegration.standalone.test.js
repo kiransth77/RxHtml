@@ -10,70 +10,70 @@ global.CustomEvent = dom.window.CustomEvent;
 
 // Create standalone versions of the functions for testing without htmx dependency
 function createTestIntegrateHtmxWithSignals() {
-    const htmxSignal = new Subject();
+  const htmxSignal = new Subject();
 
-    // Listen to HTMX events and emit them as signals
-    document.body.addEventListener('htmx:afterSwap', (event) => {
-        htmxSignal.next({ type: 'afterSwap', detail: event.detail });
-    });
+  // Listen to HTMX events and emit them as signals
+  document.body.addEventListener('htmx:afterSwap', event => {
+    htmxSignal.next({ type: 'afterSwap', detail: event.detail });
+  });
 
-    document.body.addEventListener('htmx:beforeRequest', (event) => {
-        htmxSignal.next({ type: 'beforeRequest', detail: event.detail });
-    });
+  document.body.addEventListener('htmx:beforeRequest', event => {
+    htmxSignal.next({ type: 'beforeRequest', detail: event.detail });
+  });
 
-    return htmxSignal;
+  return htmxSignal;
 }
 
 function createTestBindSignalToDom(signal$, selector, updateFn) {
-    const subscription = signal$.subscribe((value) => {
-        const element = document.querySelector(selector);
-        if (element) {
-            updateFn(element, value);
-        }
-    });
+  const subscription = signal$.subscribe(value => {
+    const element = document.querySelector(selector);
+    if (element) {
+      updateFn(element, value);
+    }
+  });
 
-    return subscription;
+  return subscription;
 }
 
 describe('HTMX and RxJS Integration (Standalone)', () => {
-    let htmxSignal;
+  let htmxSignal;
 
-    beforeEach(() => {
-        // Set up the HTMX signal
-        htmxSignal = createTestIntegrateHtmxWithSignals();
+  beforeEach(() => {
+    // Set up the HTMX signal
+    htmxSignal = createTestIntegrateHtmxWithSignals();
+  });
+
+  test('should emit signals on HTMX events', done => {
+    const mockEvent = new CustomEvent('htmx:afterSwap', {
+      detail: { message: 'HTMX swap occurred' },
     });
 
-    test('should emit signals on HTMX events', (done) => {
-        const mockEvent = new CustomEvent('htmx:afterSwap', {
-            detail: { message: 'HTMX swap occurred' },
-        });
-
-        htmxSignal.subscribe((event) => {
-            try {
-                expect(event.type).toBe('afterSwap');
-                expect(event.detail.message).toBe('HTMX swap occurred');
-                done();
-            } catch (error) {
-                done(error);
-            }
-        });
-
-        document.body.dispatchEvent(mockEvent);
+    htmxSignal.subscribe(event => {
+      try {
+        expect(event.type).toBe('afterSwap');
+        expect(event.detail.message).toBe('HTMX swap occurred');
+        done();
+      } catch (error) {
+        done(error);
+      }
     });
 
-    test('should bind signal to DOM and update element', () => {
-        document.body.innerHTML = '<div id="test-element"></div>';
+    document.body.dispatchEvent(mockEvent);
+  });
 
-        const signal$ = new Subject();
-        const updateFn = (element, value) => {
-            element.textContent = value;
-        };
+  test('should bind signal to DOM and update element', () => {
+    document.body.innerHTML = '<div id="test-element"></div>';
 
-        createTestBindSignalToDom(signal$, '#test-element', updateFn);
+    const signal$ = new Subject();
+    const updateFn = (element, value) => {
+      element.textContent = value;
+    };
 
-        signal$.next('Updated content');
+    createTestBindSignalToDom(signal$, '#test-element', updateFn);
 
-        const element = document.querySelector('#test-element');
-        expect(element.textContent).toBe('Updated content');
-    });
+    signal$.next('Updated content');
+
+    const element = document.querySelector('#test-element');
+    expect(element.textContent).toBe('Updated content');
+  });
 });
