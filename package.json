@@ -1,10 +1,21 @@
 {
-  "name": "rxhtmx",
+  "name": "@kiransth77/rxhtmx",
   "version": "2.0.0",
   "type": "module",
   "description": "A comprehensive reactive frontend framework with components, routing, state management, and RxJS integration.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiransth77/RxHtml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kiransth77/RxHtml/issues"
+  },
+  "homepage": "https://github.com/kiransth77/RxHtml#readme",
   "bin": {
     "rxhtmx": "./cli/index.js"
   },
@@ -64,8 +75,22 @@
     "rxjs",
     "htmx",
     "frontend-framework",
-    "reactive-programming"
+    "reactive-programming",
+    "state-management",
+    "routing",
+    "components",
+    "reactive",
+    "devtools",
+    "typescript"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "kiransth77",
+  "license": "MIT",
+  "files": [
+    "src/",
+    "dist/",
+    "cli/",
+    "docs-dist/",
+    "README.md",
+    "LICENSE"
+  ]
 }
