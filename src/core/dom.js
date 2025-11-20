@@ -43,14 +43,14 @@ function mount(vnode, container) {
     container.appendChild(textNode);
     return textNode;
   }
-  
+
   if (vnode.tag === '#text') {
     const textNode = document.createTextNode(vnode.children[0] || '');
     vnode.element = textNode;
     container.appendChild(textNode);
     return textNode;
   }
-  
+
   if (vnode.tag === '#fragment') {
     const fragment = document.createDocumentFragment();
     vnode.children.forEach(child => mount(child, fragment));
@@ -58,14 +58,14 @@ function mount(vnode, container) {
     container.appendChild(fragment);
     return fragment;
   }
-  
+
   // Create element
   const element = document.createElement(vnode.tag);
   vnode.element = element;
-  
+
   // Set properties
   setProps(element, vnode.props);
-  
+
   // Mount children
   if (vnode.children && Array.isArray(vnode.children)) {
     vnode.children.forEach(child => {
@@ -74,7 +74,7 @@ function mount(vnode, container) {
       }
     });
   }
-  
+
   container.appendChild(element);
   return element;
 }
@@ -87,19 +87,19 @@ function patch(oldVNode, newVNode, container) {
     container.replaceChild(newElement, oldVNode.element);
     return;
   }
-  
+
   newVNode.element = oldVNode.element;
-  
+
   if (newVNode.tag === '#text') {
     if (oldVNode.children[0] !== newVNode.children[0]) {
       oldVNode.element.textContent = newVNode.children[0] || '';
     }
     return;
   }
-  
+
   // Update props
   patchProps(oldVNode.element, oldVNode.props, newVNode.props);
-  
+
   // Patch children
   patchChildren(oldVNode, newVNode);
 }
@@ -112,7 +112,7 @@ function patchProps(element, oldProps, newProps) {
       removeProp(element, key, oldProps[key]);
     }
   }
-  
+
   // Add/update new props
   for (const key in newProps) {
     const oldValue = oldProps[key];
@@ -128,7 +128,7 @@ function setProp(element, key, value, oldValue) {
   if (key === 'key' || key === 'ref') {
     return; // Special props
   }
-  
+
   if (key.startsWith('on') && typeof value === 'function') {
     // Event listeners
     const eventName = key.slice(2).toLowerCase();
@@ -180,17 +180,17 @@ function patchChildren(oldVNode, newVNode) {
   const oldChildren = oldVNode.children;
   const newChildren = newVNode.children;
   const commonLength = Math.min(oldChildren.length, newChildren.length);
-  
+
   // Patch common children
   for (let i = 0; i < commonLength; i++) {
     patch(oldChildren[i], newChildren[i], oldVNode.element);
   }
-  
+
   // Remove extra old children
   for (let i = commonLength; i < oldChildren.length; i++) {
     oldVNode.element.removeChild(oldChildren[i].element);
   }
-  
+
   // Add new children
   for (let i = commonLength; i < newChildren.length; i++) {
     mount(newChildren[i], oldVNode.element);
@@ -211,19 +211,19 @@ const delegatedEvents = new Map();
 
 export function delegate(container, eventType, selector, handler) {
   const key = `${eventType}:${selector}`;
-  
+
   if (!delegatedEvents.has(key)) {
-    const delegateHandler = (event) => {
+    const delegateHandler = event => {
       const target = event.target.closest(selector);
       if (target && container.contains(target)) {
         handler.call(target, event);
       }
     };
-    
+
     container.addEventListener(eventType, delegateHandler);
     delegatedEvents.set(key, delegateHandler);
   }
-  
+
   return () => {
     const delegateHandler = delegatedEvents.get(key);
     if (delegateHandler) {
@@ -270,15 +270,15 @@ export function animate(element, keyframes, options) {
 }
 
 export function fadeIn(element, duration = 300) {
-  return animate(element, [
-    { opacity: 0 },
-    { opacity: 1 }
-  ], { duration, fill: 'forwards' });
+  return animate(element, [{ opacity: 0 }, { opacity: 1 }], {
+    duration,
+    fill: 'forwards',
+  });
 }
 
 export function fadeOut(element, duration = 300) {
-  return animate(element, [
-    { opacity: 1 },
-    { opacity: 0 }
-  ], { duration, fill: 'forwards' });
+  return animate(element, [{ opacity: 1 }, { opacity: 0 }], {
+    duration,
+    fill: 'forwards',
+  });
 }

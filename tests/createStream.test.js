@@ -15,7 +15,7 @@ describe('createStream', () => {
     // Manual mock for console.warn
     warnMock = () => {};
     warnMock.calls = [];
-    global.console = { warn: (message) => warnMock.calls.push(message) };
+    global.console = { warn: message => warnMock.calls.push(message) };
   });
 
   it('should create a stream for an existing element', () => {
@@ -40,6 +40,8 @@ describe('createStream', () => {
   it('should warn if the element does not exist', () => {
     createStream('#non-existent-element');
 
-    expect(warnMock.calls).toContain('Element not found for selector: #non-existent-element');
+    expect(warnMock.calls).toContain(
+      'Element not found for selector: #non-existent-element'
+    );
   });
 });

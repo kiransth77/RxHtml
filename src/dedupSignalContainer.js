@@ -44,6 +44,6 @@ export function createDedupSignalContainer() {
     },
     entries() {
       return Array.from(valueMap.entries());
-    }
+    },
   };
 }

@@ -54,6 +54,6 @@ export function createScopedSignalContainer() {
     },
     size() {
       return signals.size;
-    }
+    },
   };
 }

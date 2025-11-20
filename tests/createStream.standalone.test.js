@@ -8,7 +8,7 @@ function createTestStream(selector) {
   const subject = new Subject();
 
   if (element) {
-    element.addEventListener('input', (event) => {
+    element.addEventListener('input', event => {
       subject.next(event.target.value);
     });
   } else {
@@ -30,7 +30,7 @@ describe('createStream (Standalone)', () => {
 
     // Manual mock for console.warn
     warnMock = { calls: [] };
-    global.console = { warn: (message) => warnMock.calls.push(message) };
+    global.console = { warn: message => warnMock.calls.push(message) };
   });
 
   it('should create a stream for an existing element', () => {
@@ -56,7 +56,9 @@ describe('createStream (Standalone)', () => {
     const stream = createTestStream('#nonexistent-element');
 
     // Check that a warning was logged
-    expect(warnMock.calls).toContain('Element not found for selector: #nonexistent-element');
+    expect(warnMock.calls).toContain(
+      'Element not found for selector: #nonexistent-element'
+    );
   });
 
   it('should handle multiple values', () => {

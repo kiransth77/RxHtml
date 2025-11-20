@@ -5,7 +5,9 @@ export function signal(initialValue) {
   let _value = initialValue;
   const subscribers = new Set();
   const sig = {
-    get value() { return _value; },
+    get value() {
+      return _value;
+    },
     set value(v) {
       if (_value !== v) {
         _value = v;
@@ -16,7 +18,7 @@ export function signal(initialValue) {
       subscribers.add(fn);
       fn(_value);
       return () => subscribers.delete(fn);
-    }
+    },
   };
   return sig;
 }

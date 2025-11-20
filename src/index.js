@@ -30,7 +30,6 @@ export * from './state/store.js';
 // Legacy signal support (for backward compatibility)
 import { signal, effect } from './signal.js';
 
-
 /**
  * Creates a reactive signal for an HTML input element.
  * @param {string} selector - The CSS selector for the target element.
@@ -43,7 +42,7 @@ export function createStream(selector) {
     console.warn(`[RxHtmx] Element not found for selector: ${selector}`);
     return sig;
   }
-  const handler = (event) => {
+  const handler = event => {
     sig.value = event.target.value;
   };
   element.addEventListener('input', handler);
@@ -54,7 +53,6 @@ export function createStream(selector) {
   return sig;
 }
 
-
 /**
  * Integrates htmx events with signals.
  * @returns {object} - A signal that updates with htmx events.
@@ -62,20 +60,25 @@ export function createStream(selector) {
 export function integrateHtmxWithSignals() {
   const htmxSig = signal(null);
   if (typeof window === 'undefined' || !document.body) {
-    console.warn('[RxHtmx] integrateHtmxWithSignals called outside browser environment.');
+    console.warn(
+      '[RxHtmx] integrateHtmxWithSignals called outside browser environment.'
+    );
     return htmxSig;
   }
-  const afterSwapHandler = (event) => {
+  const afterSwapHandler = event => {
     htmxSig.value = { type: 'afterSwap', detail: event.detail };
   };
-  const beforeRequestHandler = (event) => {
+  const beforeRequestHandler = event => {
     htmxSig.value = { type: 'beforeRequest', detail: event.detail };
   };
   document.body.addEventListener('htmx:afterSwap', afterSwapHandler);
   document.body.addEventListener('htmx:beforeRequest', beforeRequestHandler);
   htmxSig.unsubscribe = () => {
     document.body.removeEventListener('htmx:afterSwap', afterSwapHandler);
-    document.body.removeEventListener('htmx:beforeRequest', beforeRequestHandler);
+    document.body.removeEventListener(
+      'htmx:beforeRequest',
+      beforeRequestHandler
+    );
   };
   return htmxSig;
 }
@@ -86,11 +89,13 @@ export function bindSignalToDom(sig, selector, updateFn) {
     throw new Error('[RxHtmx] bindSignalToDom: sig must be a signal');
   }
   let lastElement = null;
-  const unsubscribe = sig.subscribe((value) => {
+  const unsubscribe = sig.subscribe(value => {
     const element = document.querySelector(selector);
     if (!element) {
       if (lastElement !== null) {
-        console.warn(`[RxHtmx] Element for selector '${selector}' is no longer in the DOM.`);
+        console.warn(
+          `[RxHtmx] Element for selector '${selector}' is no longer in the DOM.`
+        );
       }
       lastElement = null;
       return;

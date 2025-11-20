@@ -4,7 +4,8 @@
 import { JSDOM } from 'jsdom';
 
 // Set up comprehensive DOM environment
-const dom = new JSDOM(`
+const dom = new JSDOM(
+  `
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,11 +15,13 @@ const dom = new JSDOM(`
   <div id="app"></div>
 </body>
 </html>
-`, {
-  url: 'http://localhost:3000/',
-  pretendToBeVisual: true,
-  resources: 'usable'
-});
+`,
+  {
+    url: 'http://localhost:3000/',
+    pretendToBeVisual: true,
+    resources: 'usable',
+  }
+);
 
 // Preserve console before any global assignments
 const originalConsole = console;
@@ -37,51 +40,59 @@ global.console = originalConsole;
 global.window.console = originalConsole;
 
 // Import all framework components
-import { signal, computed, effect, batch, isSignal } from '../src/core/signal.js';
+import {
+  signal,
+  computed,
+  effect,
+  batch,
+  isSignal,
+} from '../src/core/signal.js';
 import { defineComponent, createComponent } from '../src/core/component.js';
 import { createRouter } from '../src/router/router.js';
 import { createStore } from '../src/state/store.js';
 
 describe('Framework Integration Tests', () => {
   let app, router, store;
-  
+
   // Ensure console is available (preserve original console)
   if (typeof console === 'undefined' || !console.log) {
     const customConsole = {
       log: (...args) => process.stdout.write(args.join(' ') + '\n'),
       warn: (...args) => process.stderr.write('WARN: ' + args.join(' ') + '\n'),
-      error: (...args) => process.stderr.write('ERROR: ' + args.join(' ') + '\n'),
+      error: (...args) =>
+        process.stderr.write('ERROR: ' + args.join(' ') + '\n'),
       info: (...args) => process.stdout.write('INFO: ' + args.join(' ') + '\n'),
-      debug: (...args) => process.stdout.write('DEBUG: ' + args.join(' ') + '\n')
+      debug: (...args) =>
+        process.stdout.write('DEBUG: ' + args.join(' ') + '\n'),
     };
     global.console = customConsole;
     if (global.window) {
       global.window.console = customConsole;
     }
   }
-  
+
   beforeEach(() => {
     console.log('🧹 Setting up test environment...');
     document.body.innerHTML = '<div id="app"></div>';
-    
+
     // Create store
     console.log('🏪 Creating store...');
     store = createStore({
       state: {
         user: null,
         counter: 0,
-        todos: []
+        todos: [],
       },
       mutations: {
-        setUser: (state, user) => state.user = user,
-        increment: (state) => state.counter++,
+        setUser: (state, user) => (state.user = user),
+        increment: state => state.counter++,
         addTodo: (state, todo) => {
           state.todos = [...state.todos, todo];
         },
         toggleTodo: (state, id) => {
           const todo = state.todos.find(t => t.id === id);
           if (todo) todo.completed = !todo.completed;
-        }
+        },
       },
       actions: {
         login: async ({ commit }, credentials) => {
@@ -93,17 +104,17 @@ describe('Framework Integration Tests', () => {
           const todo = {
             id: Date.now(),
             text,
-            completed: false
+            completed: false,
           };
           commit('addTodo', todo);
-        }
+        },
       },
       getters: {
-        completedTodos: (state) => state.todos.filter(t => t.completed),
-        todoCount: (state) => state.todos.length
-      }
+        completedTodos: state => state.todos.filter(t => t.completed),
+        todoCount: state => state.todos.length,
+      },
     });
-    
+
     console.log('✅ Store created successfully');
     app = document.getElementById('app');
     console.log('📱 App element ready');
@@ -119,31 +130,30 @@ describe('Framework Integration Tests', () => {
       }
       router = null;
     }
-    
+
     // Clear any timers or effects
     if (app) {
       app.innerHTML = '';
     }
-    
+
     // Reset document body
     document.body.innerHTML = '<div id="app"></div>';
     console.log('✅ Cleanup completed');
   });
 
-  
   describe('Signal + Component Integration', () => {
     test('should create reactive components with signals', () => {
       console.log('🔄 Testing reactive components with signals...');
       const count = signal(0);
       console.log('📊 Signal created');
-      
+
       const Counter = defineComponent({
         name: 'Counter',
         setup() {
           console.log('⚙️ Setting up Counter component');
           const increment = () => count.value++;
           const doubleCount = computed(() => count.value * 2);
-          
+
           return { count, increment, doubleCount };
         },
         template: `
@@ -152,118 +162,132 @@ describe('Framework Integration Tests', () => {
             <span data-testid="double">{{doubleCount}}</span>
             <button @click="increment">+</button>
           </div>
-        `
+        `,
       });
-      
+
       console.log('🏗️ Creating component instance...');
       const component = createComponent(Counter);
       console.log('📦 Mounting component...');
       component.mount(app);
       console.log('✅ Component mounted successfully');
       console.log('✅ Component mounted successfully');
-      
+
       console.log('🔍 Querying DOM elements...');
       const countEl = app.querySelector('[data-testid="count"]');
       const doubleEl = app.querySelector('[data-testid="double"]');
       const button = app.querySelector('button');
-      
+
       console.log('📋 Current DOM:', app.innerHTML);
       console.log('💯 Count element:', countEl?.textContent);
       console.log('✖️2 Double element:', doubleEl?.textContent);
-      
+
       expect(countEl?.textContent).toBe('0');
       expect(doubleEl?.textContent).toBe('0');
-      
+
       console.log('🖱️ Simulating button click...');
       button?.click();
-      
+
       console.log('📋 DOM after click:', app.innerHTML);
       console.log('💯 Count after click:', countEl?.textContent);
       console.log('✖️2 Double after click:', doubleEl?.textContent);
-      
+
       // Should update reactively
       expect(countEl?.textContent).toBe('1');
       expect(doubleEl?.textContent).toBe('2');
       console.log('✅ Reactive update test passed');
     });
-    
+
     test('should handle props and reactive updates', () => {
       const message = signal('Hello');
-      
+
       const Greeting = defineComponent({
         name: 'Greeting',
         props: {
-          name: { type: String, required: true }
+          name: { type: String, required: true },
         },
         setup(props) {
-          const fullMessage = computed(() => `${message.value}, ${props.name}!`);
+          const fullMessage = computed(
+            () => `${message.value}, ${props.name}!`
+          );
           return { fullMessage };
         },
-        template: '<div data-testid="greeting">{{fullMessage}}</div>'
+        template: '<div data-testid="greeting">{{fullMessage}}</div>',
       });
-      
+
       const component = createComponent(Greeting, { name: 'World' });
       component.mount(app);
-      
+
       const greetingEl = app.querySelector('[data-testid="greeting"]');
       expect(greetingEl.textContent).toBe('Hello, World!');
-      
+
       // Update signal
       message.value = 'Hi';
       expect(greetingEl.textContent).toBe('Hi, World!');
     });
   });
-  
+
   describe('Router + Component Integration', () => {
     test('should render components for routes', async () => {
       console.log('🧭 Testing router + component integration...');
-      
+
       const Home = defineComponent({
         name: 'Home',
-        template: '<div data-testid="page">Home Page</div>'
+        template: '<div data-testid="page">Home Page</div>',
       });
-      
+
       const About = defineComponent({
         name: 'About',
-        template: '<div data-testid="page">About Page</div>'
+        template: '<div data-testid="page">About Page</div>',
       });
-      
+
       console.log('🛤️ Creating router...');
       router = createRouter({
         routes: [
           { path: '/', component: Home },
-          { path: '/about', component: About }
-        ]
+          { path: '/about', component: About },
+        ],
       });
-      
+
       console.log('🔧 Mounting router...');
       router.mount(app);
       console.log('✅ Router mounted');
-      
+
       console.log('🏠 Navigating to home...');
       await Promise.race([
         router.push('/'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Router push timeout')), 5000))
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Router push timeout')), 5000)
+        ),
       ]);
-      
+
       console.log('📋 DOM after home navigation:', app.innerHTML);
       const homeElement = app.querySelector('[data-testid="page"]');
-      console.log('🏠 Home element found:', !!homeElement, homeElement?.textContent);
+      console.log(
+        '🏠 Home element found:',
+        !!homeElement,
+        homeElement?.textContent
+      );
       expect(homeElement?.textContent).toBe('Home Page');
-      
+
       console.log('ℹ️ Navigating to about...');
       await Promise.race([
         router.push('/about'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Router push timeout')), 5000))
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Router push timeout')), 5000)
+        ),
       ]);
-      
+
       console.log('📋 DOM after about navigation:', app.innerHTML);
       const aboutElement = app.querySelector('[data-testid="page"]');
-      console.log('ℹ️ About element found:', !!aboutElement, aboutElement?.textContent);
+      console.log(
+        'ℹ️ About element found:',
+        !!aboutElement,
+        aboutElement?.textContent
+      );
       expect(aboutElement?.textContent).toBe('About Page');
       console.log('✅ Router navigation test passed');
     }, 10000); // 10 second timeout
-    
+
     test('should pass route params to components', async () => {
       const User = defineComponent({
         name: 'User',
@@ -271,36 +295,36 @@ describe('Framework Integration Tests', () => {
           const route = router.currentRoute;
           return { route };
         },
-        template: '<div data-testid="user">User ID: {{route.params.id}}</div>'
+        template: '<div data-testid="user">User ID: {{route.params.id}}</div>',
       });
-      
+
       router = createRouter({
-        routes: [
-          { path: '/user/:id', component: User }
-        ]
+        routes: [{ path: '/user/:id', component: User }],
       });
-      
+
       router.mount(app);
-      
+
       await router.push('/user/123');
-      
-      expect(app.querySelector('[data-testid="user"]').textContent).toBe('User ID: 123');
+
+      expect(app.querySelector('[data-testid="user"]').textContent).toBe(
+        'User ID: 123'
+      );
     });
   });
-  
+
   describe('Store + Component Integration', () => {
     test('should connect components to store state', () => {
       const TodoList = defineComponent({
         name: 'TodoList',
         setup() {
-          const addTodo = (text) => store.dispatch('createTodo', text);
-          const toggleTodo = (id) => store.commit('toggleTodo', id);
-          
+          const addTodo = text => store.dispatch('createTodo', text);
+          const toggleTodo = id => store.commit('toggleTodo', id);
+
           return {
             todos: store.state.todos,
             todoCount: store.getters.todoCount,
             addTodo,
-            toggleTodo
+            toggleTodo,
           };
         },
         template: `
@@ -313,31 +337,35 @@ describe('Framework Integration Tests', () => {
             </div>
             <button @click="addTodo('New Todo')">Add Todo</button>
           </div>
-        `
+        `,
       });
-      
+
       const component = createComponent(TodoList);
       component.mount(app);
-      
-      expect(app.querySelector('[data-testid="count"]').textContent).toBe('Todos: 0');
-      
+
+      expect(app.querySelector('[data-testid="count"]').textContent).toBe(
+        'Todos: 0'
+      );
+
       console.log('🧪 About to click button to add todo...');
       console.log('🧪 Store state before click:', store.getState());
-      
+
       // Add todo
       app.querySelector('button').click();
-      
+
       console.log('🧪 Store state after click:', store.getState());
       console.log('🧪 DOM after click:', app.innerHTML);
-      
-      expect(app.querySelector('[data-testid="count"]').textContent).toBe('Todos: 1');
+
+      expect(app.querySelector('[data-testid="count"]').textContent).toBe(
+        'Todos: 1'
+      );
     });
   });
-  
+
   describe('Full App Integration', () => {
     test('should create complete app with routing and state', async () => {
       console.log('🚀 Testing full app integration...');
-      
+
       // Counter component
       const Counter = defineComponent({
         name: 'Counter',
@@ -345,7 +373,7 @@ describe('Framework Integration Tests', () => {
           console.log('⚙️ Setting up Counter component');
           return {
             counter: store.state.counter,
-            increment: () => store.commit('increment')
+            increment: () => store.commit('increment'),
           };
         },
         template: `
@@ -353,9 +381,9 @@ describe('Framework Integration Tests', () => {
             <h1>Counter: {{counter}}</h1>
             <button @click="increment">+</button>
           </div>
-        `
+        `,
       });
-      
+
       // Profile component
       const Profile = defineComponent({
         name: 'Profile',
@@ -365,10 +393,12 @@ describe('Framework Integration Tests', () => {
             user: store.state.user,
             login: async () => {
               console.log('🔐 Executing login action...');
-              const result = await store.dispatch('login', { username: 'testuser' });
+              const result = await store.dispatch('login', {
+                username: 'testuser',
+              });
               console.log('🔐 Login completed');
               return result;
-            }
+            },
           };
         },
         template: `
@@ -378,83 +408,97 @@ describe('Framework Integration Tests', () => {
               <button @click="login">Login</button>
             </div>
           </div>
-        `
+        `,
       });
-      
+
       // Create router
       console.log('🛤️ Creating router for full app...');
       router = createRouter({
         routes: [
           { path: '/', component: Counter },
-          { path: '/profile', component: Profile }
-        ]
+          { path: '/profile', component: Profile },
+        ],
       });
-      
+
       // Mount router with timeout protection
       console.log('🔧 Mounting router...');
       await Promise.race([
-        new Promise((resolve) => {
+        new Promise(resolve => {
           router.mount(app);
           resolve();
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Router mount timeout')), 5000))
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Router mount timeout')), 5000)
+        ),
       ]);
       console.log('✅ Router mounted successfully');
-      
+
       // Test counter page with timeout
       console.log('🏠 Navigating to counter page...');
       await Promise.race([
         router.push('/'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Counter navigation timeout')), 5000))
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Counter navigation timeout')),
+            5000
+          )
+        ),
       ]);
-      
+
       console.log('📋 DOM after counter navigation:', app.innerHTML);
       const counterPage = app.querySelector('[data-testid="counter-page"]');
       const h1Element = app.querySelector('h1');
-      
+
       console.log('📊 Counter page found:', !!counterPage);
       console.log('📊 H1 element found:', !!h1Element, h1Element?.textContent);
-      
+
       expect(counterPage).toBeTruthy();
       expect(h1Element?.textContent).toBe('Counter: 0');
-      
+
       // Increment counter
       console.log('🖱️ Clicking increment button...');
       const incrementButton = app.querySelector('button');
       incrementButton?.click();
       console.log('📊 Counter after increment:', h1Element?.textContent);
       expect(h1Element?.textContent).toBe('Counter: 1');
-      
+
       // Navigate to profile with timeout
       console.log('👤 Navigating to profile page...');
       await Promise.race([
         router.push('/profile'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile navigation timeout')), 5000))
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Profile navigation timeout')),
+            5000
+          )
+        ),
       ]);
-      
+
       console.log('📋 DOM after profile navigation:', app.innerHTML);
       const profilePage = app.querySelector('[data-testid="profile-page"]');
       console.log('👤 Profile page found:', !!profilePage);
       expect(profilePage).toBeTruthy();
-      
+
       // Test login with timeout
       console.log('🔐 Testing login functionality...');
       const loginButton = app.querySelector('button');
       if (loginButton) {
         console.log('🖱️ Clicking login button...');
         await Promise.race([
-          new Promise((resolve) => {
+          new Promise(resolve => {
             loginButton.click();
             // Give some time for async login to complete
             setTimeout(resolve, 100);
           }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Login timeout')), 5000))
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Login timeout')), 5000)
+          ),
         ]);
       }
-      
+
       // Wait a bit more for the store update to propagate
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       console.log('📋 DOM after login:', app.innerHTML);
       console.log('👤 Checking login result...');
       const welcomeText = app.textContent;
@@ -463,17 +507,19 @@ describe('Framework Integration Tests', () => {
       console.log('✅ Full app integration test passed');
     }, 15000); // 15 second timeout for this complex test
   });
-  
+
   describe('Complex State Updates', () => {
     test('should handle batched updates across systems', () => {
       const count1 = signal(0);
       const count2 = signal(0);
-      
+
       const Component = defineComponent({
         name: 'BatchTest',
         setup() {
-          const total = computed(() => count1.value + count2.value + store.state.counter.value);
-          
+          const total = computed(
+            () => count1.value + count2.value + store.state.counter.value
+          );
+
           const batchUpdate = () => {
             batch(() => {
               count1.value++;
@@ -481,8 +527,14 @@ describe('Framework Integration Tests', () => {
               store.commit('increment');
             });
           };
-          
-          return { count1, count2, storeCounter: store.state.counter, total, batchUpdate };
+
+          return {
+            count1,
+            count2,
+            storeCounter: store.state.counter,
+            total,
+            batchUpdate,
+          };
         },
         template: `
           <div>
@@ -492,17 +544,17 @@ describe('Framework Integration Tests', () => {
             <span data-testid="total">{{total}}</span>
             <button @click="batchUpdate">Update All</button>
           </div>
-        `
+        `,
       });
-      
+
       const component = createComponent(Component);
       component.mount(app);
-      
+
       expect(app.querySelector('[data-testid="total"]').textContent).toBe('0');
-      
+
       // Trigger batched update
       app.querySelector('button').click();
-      
+
       // All should update together
       expect(app.querySelector('[data-testid="count1"]').textContent).toBe('1');
       expect(app.querySelector('[data-testid="count2"]').textContent).toBe('1');
@@ -510,7 +562,7 @@ describe('Framework Integration Tests', () => {
       expect(app.querySelector('[data-testid="total"]').textContent).toBe('3');
     });
   });
-  
+
   describe('Error Boundaries', () => {
     test('should handle component errors gracefully', () => {
       // Test that the framework doesn't crash when errors occur
@@ -520,29 +572,29 @@ describe('Framework Integration Tests', () => {
           const triggerError = () => {
             throw new Error('Test error');
           };
-          
+
           return { triggerError };
         },
-        template: '<button @click="triggerError">Trigger Error</button>'
+        template: '<button @click="triggerError">Trigger Error</button>',
       });
-      
+
       const component = createComponent(ErrorComponent);
       component.mount(app);
-      
+
       // Verify component was mounted
       expect(app.querySelector('button')).toBeTruthy();
-      
+
       // Error handling is handled by JSDOM, we just verify the framework structure remains intact
       expect(component).toBeTruthy();
       expect(component.element).toBeTruthy();
     });
   });
-  
+
   describe('Memory Management', () => {
     test('should clean up subscriptions on unmount', () => {
       const count = signal(0);
       let effectCalls = 0;
-      
+
       const Component = defineComponent({
         name: 'CleanupTest',
         setup() {
@@ -550,27 +602,27 @@ describe('Framework Integration Tests', () => {
             count.value; // Access signal
             effectCalls++;
           });
-          
+
           return { count };
         },
-        template: '<div>{{count}}</div>'
+        template: '<div>{{count}}</div>',
       });
-      
+
       const component = createComponent(Component);
       component.mount(app);
-      
+
       expect(effectCalls).toBe(1);
-      
+
       // Update signal
       count.value++;
       expect(effectCalls).toBe(2);
-      
+
       // Unmount component
       component.unmount();
-      
+
       // Update signal again
       count.value++;
-      
+
       // Effect should not be called after unmount
       expect(effectCalls).toBe(2);
     });
