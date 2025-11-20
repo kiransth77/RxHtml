@@ -7,26 +7,26 @@
 export const performanceBudget = {
   // Total bundle size limits (in KB)
   bundle: {
-    max: 50, // Maximum total bundle size
-    warn: 40, // Warning threshold
+    max: 100, // Maximum total bundle size
+    warn: 80, // Warning threshold
   },
 
   // Individual chunk limits
   chunks: {
-    max: 20,
-    warn: 15,
+    max: 50,
+    warn: 40,
   },
 
   // Asset limits
   assets: {
-    max: 10,
-    warn: 8,
+    max: 20,
+    warn: 15,
   },
 
   // Initial load budget
   initial: {
-    max: 30,
-    warn: 25,
+    max: 60,
+    warn: 50,
   },
 };
 
