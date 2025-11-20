@@ -153,3 +153,65 @@ export function bindSignalToDom<T>(
   selector: string,
   updateFn: (element: HTMLElement, value: T) => void
 ): () => void;
+
+// Performance Monitoring
+export {
+  PerformanceMonitor,
+  PerformanceMeasurement,
+  PerformanceMark,
+  ActiveMetric,
+  perf,
+  measureRender,
+  measureEffect,
+  FPSMonitor
+} from './utils/performance';
+
+// DevTools
+export {
+  DevToolsPanel,
+  DevToolsFilters,
+  ComponentInfo,
+  devtools
+} from './devtools/panel';
+
+export {
+  NetworkInspector,
+  NetworkRequest,
+  NetworkFilters,
+  NetworkStats,
+  networkInspector
+} from './devtools/network-inspector';
+
+export {
+  EnhancedErrorOverlay,
+  ErrorRecord,
+  ErrorFilters
+} from './devtools/enhanced-error-overlay';
+
+export {
+  TimeTravelDebugger,
+  Snapshot,
+  HistoryEntry,
+  TimeTravelStats,
+  timeTravel
+} from './devtools/time-travel';
+
+// Performance Budget
+export {
+  PerformanceBudget,
+  BudgetLimits,
+  performanceBudget,
+  performanceBudgetPlugin
+} from '../vite.performance-budget.config';
+
+// Global Window Extensions
+declare global {
+  interface Window {
+    __RXHTMX_PERF__?: boolean;
+    __RXHTMX_DEVTOOLS__?: DevToolsPanel;
+    __RXHTMX_NETWORK__?: NetworkInspector;
+    __RXHTMX_ERROR_OVERLAY__?: EnhancedErrorOverlay;
+    __RXHTMX_TIME_TRAVEL__?: TimeTravelDebugger;
+    __RXHTMX_ERRORS__?: ErrorRecord[];
+  }
+}

@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import fs from 'fs';
-import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { performanceBudgetPlugin } from './vite.performance-budget.config.js';
 
 export default defineConfig(({ mode }) => ({
   // Root directory for serving files
@@ -117,7 +116,9 @@ export default defineConfig(({ mode }) => ({
       name: 'rxhtmx-hmr',
       handleHotUpdate({ file, server }) {
         if (file.endsWith('.js')) {
+          /* eslint-disable no-console */
           console.log(`[RxHtmx HMR] Reloading ${file}`);
+          /* eslint-enable no-console */
           server.ws.send({
             type: 'full-reload',
             path: '*',
@@ -136,7 +137,7 @@ export default defineConfig(({ mode }) => ({
           next();
         });
       },
-      handleHotUpdate(ctx) {
+      handleHotUpdate() {
         // Do nothing here
       },
       transform(code, id) {
@@ -158,6 +159,8 @@ export default defineConfig(({ mode }) => ({
         brotliSize: true,
         template: 'treemap', // sunburst, treemap, network
       }),
+    // Performance budget enforcement
+    performanceBudgetPlugin(),
   ].filter(Boolean),
 
   // Optimize dependencies
