@@ -5,9 +5,6 @@
   "description": "A comprehensive reactive frontend framework with components, routing, state management, and RxJS integration.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kiransth77/RxHtml.git"

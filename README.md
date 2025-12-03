@@ -8,6 +8,18 @@ modern build tools.
 
 ## 📦 Installation
 
+### From npm (Public Registry - Recommended)
+
+```bash
+npm install @kiransth77/rxhtmx
+
+# Or with Bun
+bun add @kiransth77/rxhtmx
+
+# Or with Yarn
+yarn add @kiransth77/rxhtmx
+```
+
 ### From GitHub Packages
 
 ```bash
@@ -21,7 +33,7 @@ npm install @kiransth77/rxhtmx
 bun add @kiransth77/rxhtmx
 ```
 
-### Authentication (if required)
+### Authentication (if required for GitHub Packages)
 
 ```bash
 # Login to GitHub Packages
