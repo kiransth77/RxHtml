@@ -39,7 +39,7 @@
     "preversion": "bun run test && bun run lint",
     "version": "bun run build && git add dist/",
     "postversion": "git push && git push --tags",
-    "prepare": "husky install"
+    "prepare": "command -v husky > /dev/null && husky install || true"
   },
   "lint-staged": {
     "*.js": [

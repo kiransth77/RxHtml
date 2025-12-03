@@ -4,13 +4,9 @@ on:
     release:
         types: [created]
     workflow_dispatch:
-        inputs:
-            version:
-                description: "Version to publish (leave empty to use package.json version)"
-                required: false
 
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -32,25 +28,25 @@ jobs:
             - name: Build package
               run: bun run build
 
-            - name: Setup Node.js for npm registry
+            - name: Setup Node.js for npm
               uses: actions/setup-node@v4
               with:
                   node-version: "20.x"
-                  registry-url: "https://registry.npmjs.org/"
+                  registry-url: "https://registry.npmjs.org"
 
             - name: Publish to npm
-              run: npm publish
+              run: npm publish --registry https://registry.npmjs.org/
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              continue-on-error: true
 
             - name: Setup Node.js for GitHub Packages
               uses: actions/setup-node@v4
               with:
                   node-version: "20.x"
                   registry-url: "https://npm.pkg.github.com"
-                  scope: "@kiransth77"
 
             - name: Publish to GitHub Packages
-              run: npm publish
+              run: npm publish --registry https://npm.pkg.github.com/
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
