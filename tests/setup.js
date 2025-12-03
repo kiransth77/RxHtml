@@ -12,6 +12,21 @@ global.CustomEvent = dom.window.CustomEvent;
 global.location = dom.window.location;
 global.history = dom.window.history;
 global.navigator = dom.window.navigator;
+global.localStorage = dom.window.localStorage;
+global.sessionStorage = dom.window.sessionStorage;
+global.Storage = dom.window.Storage;
+
+// Also set on globalThis for direct access
+globalThis.localStorage = dom.window.localStorage;
+globalThis.sessionStorage = dom.window.sessionStorage;
+
+// Mock requestAnimationFrame
+global.requestAnimationFrame = (callback) => {
+  return setTimeout(callback, 16); // ~60fps
+};
+global.cancelAnimationFrame = (id) => {
+  clearTimeout(id);
+};
 
 // Mock htmx globally before any other imports
 import mockHtmx from './mocks/htmx.js';

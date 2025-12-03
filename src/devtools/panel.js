@@ -3,7 +3,7 @@
  * Minimal in-app developer tools for inspecting signals, components, and state
  */
 
-import { isSignal } from '../core/signals.js';
+import { isSignal } from '../core/signal.js';
 
 class DevToolsPanel {
   constructor() {

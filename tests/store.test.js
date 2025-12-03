@@ -1,6 +1,8 @@
 // Tests for the state management system
 // Tests store creation, state mutations, getters, and middleware
 
+import './setup.js'; // Load global test environment
+
 import {
   createStore,
   useStore,
@@ -221,7 +223,7 @@ describe('State Store System', () => {
 
     test('should apply persistence middleware', () => {
       const setItemSpy = jest
-        .spyOn(Storage.prototype, 'setItem')
+        .spyOn(localStorage, 'setItem')
         .mockImplementation();
 
       const store = createStore({
@@ -244,7 +246,7 @@ describe('State Store System', () => {
 
     test('should restore state from localStorage', () => {
       const getItemSpy = jest
-        .spyOn(Storage.prototype, 'getItem')
+        .spyOn(localStorage, 'getItem')
         .mockReturnValue(JSON.stringify({ count: 5 }));
 
       const store = createStore({

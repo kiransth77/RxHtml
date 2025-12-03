@@ -26,7 +26,9 @@ export class Router {
   }
 
   init() {
-    console.log('Router initialization started');
+    if (typeof console !== 'undefined' && console.log) {
+      console.log('Router initialization started');
+    }
     // Set up event listeners
     if (this.mode === 'history') {
       window.addEventListener('popstate', this.handlePopState.bind(this));
@@ -58,38 +60,52 @@ export class Router {
   }
 
   async handleRoute(path) {
-    console.log(`Handling route: ${path}`);
+    if (typeof console !== 'undefined' && console.log) {
+      console.log(`Handling route: ${path}`);
+    }
     const route = this.matchRoute(path);
 
     if (!route) {
-      console.warn(`No route found for path: ${path}`);
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn(`No route found for path: ${path}`);
+      }
       return;
     }
 
     // Run before guards
-    console.log('Running before guards');
+    if (typeof console !== 'undefined' && console.log) {
+      console.log('Running before guards');
+    }
     const canNavigate = await this.runBeforeGuards(
       route,
       this.currentRoute.value
     );
     if (!canNavigate) {
-      console.log('Navigation cancelled by before guards');
+      if (typeof console !== 'undefined' && console.log) {
+        console.log('Navigation cancelled by before guards');
+      }
       return;
     }
 
     // Update current route
     const previousRoute = this.currentRoute.value;
     this.currentRoute.value = route;
-    console.log(`Route updated to: ${route.path}`);
+    if (typeof console !== 'undefined' && console.log) {
+      console.log(`Route updated to: ${route.path}`);
+    }
 
     // Mount component
     if (route.component && this.container) {
-      console.log('Mounting route component');
+      if (typeof console !== 'undefined' && console.log) {
+        console.log('Mounting route component');
+      }
       this.mountRouteComponent(route);
     }
 
     // Run after hooks
-    console.log('Running after hooks');
+    if (typeof console !== 'undefined' && console.log) {
+      console.log('Running after hooks');
+    }
     this.runAfterHooks(route, previousRoute);
   }
 

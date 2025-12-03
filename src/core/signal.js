@@ -12,6 +12,24 @@ export function setCurrentComponentInstance(instance) {
   currentComponentInstance = instance;
 }
 
+// Batch updates to prevent excessive re-renders
+const updateQueue = new Set();
+const isFlushPending = false;
+let isBatching = false;
+
+// Export at top level so it can be used before definition
+export function queueUpdate(effect) {
+  if (isBatching) {
+    updateQueue.add(effect);
+  } else {
+    if (effect && typeof effect.run === 'function') {
+      effect.run();
+    } else if (typeof effect === 'function') {
+      effect();
+    }
+  }
+}
+
 export function signal(initialValue) {
   let _value = initialValue;
   const subscribers = new Set();
@@ -29,13 +47,15 @@ export function signal(initialValue) {
     set value(newValue) {
       if (_value !== newValue) {
         _value = newValue;
-        // Notify all subscribers synchronously
+        // Notify all subscribers
         const currentSubscribers = Array.from(subscribers);
-        currentSubscribers.forEach(effect => {
-          if (effect && typeof effect.run === 'function') {
-            effect.run();
-          } else if (typeof effect === 'function') {
-            effect(_value);
+        currentSubscribers.forEach(subscriber => {
+          // If it's an effect object with a run method, use queueUpdate
+          if (subscriber && typeof subscriber.run === 'function') {
+            queueUpdate(subscriber);
+          } else if (typeof subscriber === 'function') {
+            // If it's a plain function from subscribe(), call it directly
+            subscriber(newValue);
           }
         });
       }
@@ -43,7 +63,7 @@ export function signal(initialValue) {
 
     subscribe(fn) {
       subscribers.add(fn);
-      fn(_value); // Call immediately with current value
+      // Don't call immediately - only notify on value changes
       return () => subscribers.delete(fn);
     },
 
@@ -93,11 +113,7 @@ export function computed(fn) {
               // Notify subscribers of this computed signal
               const currentSubscribers = Array.from(subscribers);
               currentSubscribers.forEach(effect => {
-                if (effect && typeof effect.run === 'function') {
-                  effect.run();
-                } else if (typeof effect === 'function') {
-                  effect(computedSignal.value);
-                }
+                queueUpdate(effect);
               });
             },
           };
@@ -185,20 +201,16 @@ export function effect(fn, options = {}) {
   return effectInstance;
 }
 
-// Batch updates to prevent excessive re-renders
-const updateQueue = new Set();
-let isFlushPending = false;
-
 export function batch(fn) {
-  const wasFlushPending = isFlushPending;
-  isFlushPending = true;
+  const wasBatching = isBatching;
+  isBatching = true;
 
   try {
     fn();
   } finally {
-    if (!wasFlushPending) {
+    isBatching = wasBatching;
+    if (!isBatching) {
       flushUpdates();
-      isFlushPending = false;
     }
   }
 }
@@ -217,17 +229,19 @@ function flushUpdates() {
 // Reactive utilities
 export function watch(source, callback, options = {}) {
   const { immediate = false } = options;
-  let oldValue = immediate ? undefined : source.value;
+  let oldValue;
+  let isFirst = true;
 
   return effect(
     () => {
       const newValue = source.value;
-      if (oldValue !== newValue || immediate) {
+      if (!isFirst || immediate) {
         callback(newValue, oldValue);
-        oldValue = newValue;
       }
+      oldValue = newValue;
+      isFirst = false;
     },
-    { immediate }
+    { immediate: true } // Effect should always run immediately to set up tracking
   );
 }
 

@@ -202,7 +202,9 @@ export class FPSMonitor {
       this.frames.shift();
     }
 
-    requestAnimationFrame(() => this.tick());
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => this.tick());
+    }
   }
 
   getFPS() {

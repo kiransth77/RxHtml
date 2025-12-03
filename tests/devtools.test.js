@@ -4,7 +4,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { JSDOM } from 'jsdom';
-import { signal } from '../src/core/signals.js';
+import { signal } from '../src/core/signal.js';
 
 describe('DevTools Panel', () => {
   let dom;
