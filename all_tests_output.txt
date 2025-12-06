@@ -1,0 +1,955 @@
+bun test v1.3.3 (274e01c7)
+
+tests/signal-fixed.test.js:
+🧪 Testing basic signal functionality...
+📊 Initial value: 0
+📊 Updated value: 5
+✅ Signal test passed
+(pass) Fixed Signal Tests > should create and update signals without infinite loops [3.10ms]
+🧪 Testing computed signals...
+📊 Count: 10
+📊 Doubled: 20
+📊 Count after update: 15
+📊 Doubled after update: 30
+✅ Computed signal test passed
+(pass) Fixed Signal Tests > should create computed signals without infinite loops [2.79ms]
+🧪 Testing effects...
+🔄 Effect run #1, value: 0
+📊 Updating signal to 1...
+🔄 Effect run #2, value: 1
+📊 Effect runs after update: 2
+📊 Updating signal to 2...
+🔄 Effect run #3, value: 2
+📊 Effect runs after second update: 3
+📊 Stopping effect...
+📊 Effect runs after stop (should be 3): 3
+✅ Effect test passed
+(pass) Fixed Signal Tests > should run effects without infinite loops
+
+tests/performance.test.js:
+(pass) Performance Monitor > should start and end measurements [0.87ms]
+(pass) Performance Monitor > should add marks to measurements
+(pass) Performance Monitor > should measure synchronous functions [0.10ms]
+(pass) Performance Monitor > should measure async functions [0.05ms]
+(pass) Performance Monitor > should handle errors in measured functions [0.36ms]
+(pass) Performance Monitor > should handle errors in async measured functions [0.16ms]
+(pass) Performance Monitor > should return null for non-existent measurements [0.21ms]
+(pass) Performance Monitor > should get all active metrics [0.16ms]
+(pass) Performance Monitor > should clear all measurements
+(pass) Performance Monitor > should enable and disable monitoring
+(pass) Performance Monitor > should not measure when disabled [0.11ms]
+(pass) measureRender decorator > should wrap render function [0.04ms]
+(pass) measureRender decorator > should preserve context [0.05ms]
+(pass) measureEffect decorator > should wrap effect function [0.07ms]
+(pass) FPSMonitor > should start and stop monitoring
+(pass) FPSMonitor > should return 0 FPS initially
+(pass) FPSMonitor > should track frames [104.70ms]
+218 | 
+219 |     for (let i = 0; i < 100; i++) {
+220 |       monitor.frames.push(60);
+221 |     }
+222 | 
+223 |     expect(monitor.frames.length).toBeLessThanOrEqual(60);
+                                        ^
+error: expect(received).toBeLessThanOrEqual(expected)
+
+Expected: <= 60
+Received: 100
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/performance.test.js:223:35)
+(fail) FPSMonitor > should limit frame history to 60 frames [3.61ms]
+
+tests/devtools.test.js:
+Test setup complete - HTMX mocked globally
+(pass) DevTools Panel > should initialize panel on first init [23.46ms]
+57 |   });
+58 | 
+59 |   test('should create panel with correct structure', () => {
+60 |     devtools.init();
+61 | 
+62 |     const panel = document.getElementById('__rxhtmx_devtools');
+                       ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:62:19)
+(fail) DevTools Panel > should create panel with correct structure [6.88ms]
+87 |     expect(devtools.signals.has('testCounter')).toBe(true);
+88 |     expect(devtools.signals.get('testCounter')).toBe(testSignal);
+89 | 
+90 |     // Render signals tab
+91 |     devtools.show();
+92 |     const content = document.getElementById('__rxhtmx_devtools_content');
+                         ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:92:21)
+(fail) DevTools Panel > should register and display signals [6.77ms]
+(pass) DevTools Panel > should register and display components [4.75ms]
+(pass) DevTools Panel > should toggle visibility [6.68ms]
+130 | 
+131 |   test('should switch between tabs', () => {
+132 |     devtools.init();
+133 |     devtools.show();
+134 | 
+135 |     const tabs = document.querySelectorAll('.devtools-tab');
+                       ^
+TypeError: undefined is not an object (evaluating 'document.querySelectorAll')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:135:18)
+(fail) DevTools Panel > should switch between tabs [5.16ms]
+150 |     devtools.init();
+151 |     devtools.show();
+152 | 
+153 |     expect(devtools.panel.style.display).toBe('flex');
+154 | 
+155 |     const closeButton = document.getElementById('__rxhtmx_devtools_close');
+                              ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:155:25)
+(fail) DevTools Panel > should close panel on close button click [5.60ms]
+163 | 
+164 |     devtools.init();
+165 |     devtools.registerSignal('dangerous', maliciousSignal);
+166 |     devtools.show();
+167 | 
+168 |     const content = document.getElementById('__rxhtmx_devtools_content');
+                          ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:168:21)
+(fail) DevTools Panel > should escape HTML in signal values [6.94ms]
+175 | 
+176 |     devtools.init();
+177 |     devtools.registerSignal('objectSignal', objSignal);
+178 |     devtools.show();
+179 | 
+180 |     const content = document.getElementById('__rxhtmx_devtools_content');
+                          ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:180:21)
+(fail) DevTools Panel > should handle object signal values [6.68ms]
+184 | 
+185 |   test('should display empty state when no signals registered', () => {
+186 |     devtools.init();
+187 |     devtools.show();
+188 | 
+189 |     const content = document.getElementById('__rxhtmx_devtools_content');
+                          ^
+TypeError: undefined is not an object (evaluating 'document.getElementById')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:189:21)
+(fail) DevTools Panel > should display empty state when no signals registered [6.59ms]
+193 |   test('should display empty state when no components registered', () => {
+194 |     devtools.init();
+195 |     devtools.show();
+196 | 
+197 |     // Switch to components tab
+198 |     const tabs = document.querySelectorAll('.devtools-tab');
+                       ^
+TypeError: undefined is not an object (evaluating 'document.querySelectorAll')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:198:18)
+(fail) DevTools Panel > should display empty state when no components registered [5.20ms]
+207 |     const firstPanel = devtools.panel;
+208 | 
+209 |     devtools.init();
+210 | 
+211 |     expect(devtools.panel).toBe(firstPanel);
+212 |     expect(document.querySelectorAll('#__rxhtmx_devtools').length).toBe(1);
+                 ^
+TypeError: undefined is not an object (evaluating 'document.querySelectorAll')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:212:12)
+(fail) DevTools Panel > should not initialize twice [4.75ms]
+224 |       ctrlKey: true,
+225 |       shiftKey: true,
+226 |       bubbles: true,
+227 |     });
+228 | 
+229 |     document.dispatchEvent(event);
+          ^
+TypeError: undefined is not an object (evaluating 'document.dispatchEvent')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/devtools.test.js:229:5)
+(fail) DevTools Panel > should handle keyboard shortcut [7.60ms]
+
+tests/createStream.standalone.test.js:
+(pass) createStream (Standalone) > should create a stream for an existing element [4.07ms]
+(pass) createStream (Standalone) > should warn if the element does not exist [2.28ms]
+(pass) createStream (Standalone) > should handle multiple values [2.51ms]
+
+tests/htmxSignalIntegration.standalone.test.js:
+(pass) HTMX and RxJS Integration (Standalone) > should emit signals on HTMX events [0.78ms]
+(pass) HTMX and RxJS Integration (Standalone) > should bind signal to DOM and update element [0.57ms]
+
+tests/component.test.js:
+(pass) Component System > defineComponent() > should create component definition [0.33ms]
+(pass) Component System > Component creation and mounting > should create and mount component [1.23ms]
+(pass) Component System > Component creation and mounting > should handle props correctly
+(pass) Component System > Component creation and mounting > should use default props when not provided [0.83ms]
+(pass) Component System > Component creation and mounting > should validate prop types [0.78ms]
+(pass) Component System > Lifecycle hooks > should call mounted hook [0.73ms]
+(pass) Component System > Lifecycle hooks > should call unmounted hook [0.33ms]
+(pass) Component System > createApp() > should create app instance [0.53ms]
+(pass) Component System > createApp() > should mount app to container
+(pass) Component System > createApp() > should unmount app [0.44ms]
+(pass) Component System > Component events > should emit events to parent
+(pass) Component System > Template compilation > should interpolate expressions
+287 |         template: '<div>{{doubleCount()}}</div>',
+288 |       });
+289 | 
+290 |       const component = createComponent(TestComponent);
+291 | 
+292 |       expect(component.evaluateExpression('doubleCount()')).toBe(10);
+                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 10
+Received: "doubleCount()"
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/component.test.js:292:61)
+(fail) Component System > Template compilation > should handle method calls in templates [0.73ms]
+
+tests/integration.test.js:
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🔄 Testing reactive components with signals...
+📊 Signal created
+🏗️ Creating component instance...
+⚙️ Setting up Counter component
+📦 Mounting component...
+✅ Component mounted successfully
+✅ Component mounted successfully
+🔍 Querying DOM elements...
+📋 Current DOM: <div>
+            <span data-testid="count">0</span>
+            <span data-testid="double">0</span>
+            <button>+</button>
+          </div>
+💯 Count element: 0
+✖️2 Double element: 0
+🖱️ Simulating button click...
+📋 DOM after click: <div>
+            <span data-testid="count">1</span>
+            <span data-testid="double">2</span>
+            <button>+</button>
+          </div>
+💯 Count after click: 1
+✖️2 Double after click: 2
+✅ Reactive update test passed
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Signal + Component Integration > should create reactive components with signals [5.31ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Signal + Component Integration > should handle props and reactive updates [1.50ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🧭 Testing router + component integration...
+🛤️ Creating router...
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+🔧 Mounting router...
+✅ Router mounted
+🏠 Navigating to home...
+Handling route: /
+Running before guards
+Route updated to: /
+Mounting route component
+Running after hooks
+Route updated to: /
+Mounting route component
+Running after hooks
+📋 DOM after home navigation: <div data-testid="page">Home Page</div>
+🏠 Home element found: true Home Page
+ℹ️ Navigating to about...
+Handling route: /about
+Running before guards
+Route updated to: /about
+Mounting route component
+Running after hooks
+📋 DOM after about navigation: <div data-testid="page">About Page</div>
+ℹ️ About element found: true About Page
+✅ Router navigation test passed
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Router + Component Integration > should render components for routes [3.19ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+Router initialization started
+Handling initial route
+Handling route: /about
+WARN: No route found for path: /about
+Router initialization completed
+Handling route: /user/123
+Running before guards
+Route updated to: /user/123
+Mounting route component
+Running after hooks
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Router + Component Integration > should pass route params to components [0.68ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🧪 About to click button to add todo...
+🧪 Store state before click: [object Object]
+🧪 Store state after click: [object Object]
+🧪 DOM after click: <div>
+            <div data-testid="count">Todos: 0</div>
+            <div data-testid="todos">
+              <div v-for="todo in todos" :key="todo.id">
+                todo.text - todo.completed ? 'Done' : 'Pending'
+              </div>
+            </div>
+            <button>Add Todo</button>
+          </div>
+356 |       app.querySelector('button').click();
+357 | 
+358 |       console.log('🧪 Store state after click:', store.getState());
+359 |       console.log('🧪 DOM after click:', app.innerHTML);
+360 | 
+361 |       expect(app.querySelector('[data-testid="count"]').textContent).toBe(
+                                                                           ^
+error: expect(received).toBe(expected)
+
+Expected: "Todos: 1"
+Received: "Todos: 0"
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/integration.test.js:361:70)
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(fail) Framework Integration Tests > Store + Component Integration > should connect components to store state [2.81ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🚀 Testing full app integration...
+🛤️ Creating router for full app...
+Router initialization started
+Handling initial route
+Handling route: /user/123
+WARN: No route found for path: /user/123
+Router initialization completed
+🔧 Mounting router...
+✅ Router mounted successfully
+🏠 Navigating to counter page...
+Handling route: /
+Running before guards
+Route updated to: /
+Mounting route component
+⚙️ Setting up Counter component
+Running after hooks
+📋 DOM after counter navigation: <div data-testid="counter-page">
+            <h1>Counter: 0</h1>
+            <button>+</button>
+          </div>
+📊 Counter page found: true
+📊 H1 element found: true Counter: 0
+🖱️ Clicking increment button...
+📊 Counter after increment: Counter: 0
+460 |       // Increment counter
+461 |       console.log('🖱️ Clicking increment button...');
+462 |       const incrementButton = app.querySelector('button');
+463 |       incrementButton?.click();
+464 |       console.log('📊 Counter after increment:', h1Element?.textContent);
+465 |       expect(h1Element?.textContent).toBe('Counter: 1');
+                                           ^
+error: expect(received).toBe(expected)
+
+Expected: "Counter: 1"
+Received: "Counter: 0"
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/integration.test.js:465:38)
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(fail) Framework Integration Tests > Full App Integration > should create complete app with routing and state [2.43ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+550 |       });
+551 | 
+552 |       const component = createComponent(Component);
+553 |       component.mount(app);
+554 | 
+555 |       expect(app.querySelector('[data-testid="total"]').textContent).toBe('0');
+                                                                           ^
+error: expect(received).toBe(expected)
+
+Expected: "0"
+Received: "NaN"
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/integration.test.js:555:70)
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(fail) Framework Integration Tests > Complex State Updates > should handle batched updates across systems [1.35ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Error Boundaries > should handle component errors gracefully [0.67ms]
+🧹 Setting up test environment...
+🏪 Creating store...
+✅ Store created successfully
+📱 App element ready
+🧹 Cleaning up after test...
+✅ Cleanup completed
+(pass) Framework Integration Tests > Memory Management > should clean up subscriptions on unmount [0.48ms]
+
+tests/integration-simple.test.js:
+🧪 Testing basic signal functionality...
+📊 Initial value: 0
+📊 Updated value: 5
+✅ Signal test passed
+(pass) Simple Integration Tests > should create and update signals [1.41ms]
+🧪 Testing computed signals...
+📊 Count: 10
+📊 Doubled: 20
+📊 Count after update: 15
+📊 Doubled after update: 30
+✅ Computed signal test passed
+(pass) Simple Integration Tests > should create computed signals [0.13ms]
+🧪 Testing effects...
+🔄 Effect run #1, value: 0
+🔄 Effect run #2, value: 1
+🔄 Effect run #3, value: 2
+✅ Effect test passed
+(pass) Simple Integration Tests > should run effects
+🧪 Testing basic DOM...
+✅ DOM test passed
+(pass) Simple Integration Tests > should handle basic DOM manipulation [0.70ms]
+
+tests/core-signal.test.js:
+(pass) Enhanced Signal System > signal() > should create a reactive signal
+(pass) Enhanced Signal System > signal() > should notify subscribers when value changes
+(pass) Enhanced Signal System > signal() > should not notify when value does not change [0.23ms]
+(pass) Enhanced Signal System > computed() > should create computed signal
+(pass) Enhanced Signal System > computed() > should update when dependencies change
+(pass) Enhanced Signal System > computed() > should support multiple dependencies [0.15ms]
+(pass) Enhanced Signal System > computed() > should support nested computed values
+(pass) Enhanced Signal System > effect() > should run immediately by default
+(pass) Enhanced Signal System > effect() > should re-run when dependencies change
+(pass) Enhanced Signal System > effect() > should support multiple dependencies [0.15ms]
+(pass) Enhanced Signal System > effect() > should support stopping effects [0.03ms]
+(pass) Enhanced Signal System > watch() > should watch signal changes [0.07ms]
+(pass) Enhanced Signal System > watch() > should support immediate option [0.03ms]
+(pass) Enhanced Signal System > reactive() > should make object properties reactive [0.07ms]
+(pass) Enhanced Signal System > reactive() > should work with effects
+(pass) Enhanced Signal System > batch() > should batch multiple updates [0.11ms]
+
+tests/store.test.js:
+(pass) State Store System > Store creation > should create store with initial state
+(pass) State Store System > Store creation > should make state reactive
+(pass) State Store System > Mutations > should commit mutations
+(pass) State Store System > Mutations > should commit mutations with payload
+(pass) State Store System > Mutations > should throw error for unknown mutations
+(pass) State Store System > Actions > should dispatch actions [11.49ms]
+(pass) State Store System > Actions > should provide context to actions [12.29ms]
+(pass) State Store System > Actions > should throw error for unknown actions [0.22ms]
+(pass) State Store System > Getters > should compute simple getters [0.12ms]
+(pass) State Store System > Getters > should compute filtered getters [0.04ms]
+(pass) State Store System > Getters > should support parameterized getters [0.05ms]
+(pass) State Store System > Getters > should be reactive to state changes
+211 |         middleware: [loggingMiddleware],
+212 |       });
+213 | 
+214 |       store.commit('increment');
+215 | 
+216 |       expect(consoleSpy).toHaveBeenCalledWith(
+                               ^
+error: expect(received).toHaveBeenCalledWith(...expected)
+
+Expected: [
+  StringContaining "Mutation increment:", Anything
+]
+But it was not called.
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/store.test.js:216:26)
+(fail) State Store System > Middleware > should apply logging middleware [0.97ms]
+234 |         middleware: [persistenceMiddleware('test-store')],
+235 |       });
+236 | 
+237 |       store.commit('increment');
+238 | 
+239 |       expect(setItemSpy).toHaveBeenCalledWith(
+                               ^
+error: expect(received).toHaveBeenCalledWith(...expected)
+
+Expected: [ "test-store", "{\"count\":1}" ]
+But it was not called.
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/store.test.js:239:26)
+(fail) State Store System > Middleware > should apply persistence middleware [0.61ms]
+255 |           increment: state => state.count++,
+256 |         },
+257 |         middleware: [persistenceMiddleware('test-store')],
+258 |       });
+259 | 
+260 |       expect(store.state.count).toBe(5);
+                                      ^
+error: expect(received).toBe(expected)
+
+Expected: 5
+Received: 1
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/store.test.js:260:33)
+(fail) State Store System > Middleware > should restore state from localStorage [0.11ms]
+(pass) State Store System > Middleware > should apply custom middleware
+(pass) State Store System > Middleware > should chain multiple middleware [0.09ms]
+(pass) State Store System > Store composable > should access store via useStore [0.11ms]
+334 |           increment: state => state.count++,
+335 |         },
+336 |         middleware: [devToolsMiddleware],
+337 |       });
+338 | 
+339 |       expect(window.__REDUX_DEVTOOLS_EXTENSION__.connect).toHaveBeenCalled();
+                                                                ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/store.test.js:339:59)
+(fail) State Store System > DevTools middleware > should connect to devtools when available [0.09ms]
+(pass) State Store System > DevTools middleware > should handle missing devtools gracefully
+(pass) State Store System > Error handling > should handle mutation errors
+(pass) State Store System > Error handling > should handle action errors
+
+tests/htmxSignalIntegration.test.js:
+26 |       detail: { message: 'HTMX swap occurred' },
+27 |     });
+28 | 
+29 |     htmxSignal.subscribe(event => {
+30 |       try {
+31 |         expect(event.type).toBe('afterSwap');
+                    ^
+TypeError: null is not an object (evaluating 'event.type')
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/htmxSignalIntegration.test.js:31:16)
+      at subscribe (/Users/kiran/Desktop/Projects/RxHtml/src/signal.js:19:7)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/htmxSignalIntegration.test.js:29:16)
+(fail) HTMX and RxJS Integration > should emit signals on HTMX events [0.27ms]
+45 |     const signal$ = new Subject();
+46 |     const updateFn = (element, value) => {
+47 |       element.textContent = value;
+48 |     };
+49 | 
+50 |     bindSignalToDom(signal$, '#test-element', updateFn);
+         ^
+ReferenceError: bindSignalToDom is not defined
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/htmxSignalIntegration.test.js:50:5)
+(fail) HTMX and RxJS Integration > should bind signal to DOM and update element [0.35ms]
+
+tests/createStream.test.js:
+ERROR: [RxHtmx] HTMX not available or failed to load: TypeError: console.assert is not a function. (In 'console.assert(ctx.nodes)', 'console.assert' is undefined)
+(pass) createStream > should create a stream for an existing element [2.25ms]
+38 |   });
+39 | 
+40 |   it('should warn if the element does not exist', () => {
+41 |     createStream('#non-existent-element');
+42 | 
+43 |     expect(warnMock.calls).toContain(
+                                ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "Element not found for selector: #non-existent-element"
+Received: [ "[RxHtmx] Element not found for selector: #non-existent-element" ]
+
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/createStream.test.js:43:28)
+(fail) createStream > should warn if the element does not exist [2.19ms]
+
+tests/router.test.js:
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Router creation > should create router instance [1.67ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Router creation > should support hash mode
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route matching > should match exact routes [0.25ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route matching > should match parameterized routes [0.13ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route matching > should parse query parameters
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route matching > should return null for non-matching routes
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Navigation > should navigate to route [0.35ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Navigation > should support push navigation
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Navigation > should support replace navigation
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Navigation > should support back navigation
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route guards > should run before guards
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route guards > should block navigation when guard returns false [0.42ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route guards > should support route-specific guards
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Route guards > should run after hooks
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Auth guard > should allow access when authenticated
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Auth guard > should redirect when not authenticated
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Auth guard > should allow access for non-protected routes [0.54ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Router mounting > should mount router to container
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Router mounting > should mount current route component when mounted [0.19ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Hash mode > should handle hash changes
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Composables > useRouter should return current router [0.12ms]
+35 |     } else {
+36 |       window.addEventListener('hashchange', this.handleHashChange.bind(this));
+37 |     }
+38 | 
+39 |     // Initial route
+40 |     console.log('Handling initial route');
+                 ^
+TypeError: console.log is not a function. (In 'console.log("Handling initial route")', 'console.log' is undefined)
+      at init (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:40:13)
+      at new Router (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:25:10)
+      at createRouter (/Users/kiran/Desktop/Projects/RxHtml/src/router/router.js:289:10)
+      at <anonymous> (/Users/kiran/Desktop/Projects/RxHtml/tests/router.test.js:59:14)
+(fail) Router System > Composables > useRoute should return current route signal
+
+tests/e2e/form-validation.spec.js:
+
+# Unhandled error between tests
+-------------------------------
+283 |     }
+284 | 
+285 |     get hardwareConcurrency() {
+286 |       const esValue = this !== null && this !== undefined ? this : globalObject;
+287 | 
+288 |       if (!exports.is(esValue)) {
+                         ^
+RangeError: Maximum call stack size exceeded.
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:288:20)
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+-------------------------------
+
+
+tests/e2e/search.spec.js:
+
+# Unhandled error between tests
+-------------------------------
+1 | "use strict";
+2 | const os = require("os");
+3 | 
+4 | exports.implementation = class NavigatorConcurrentHardwareImpl {
+5 |   get hardwareConcurrency() {
+6 |     return os.cpus().length;
+                  ^
+RangeError: Maximum call stack size exceeded.
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+      at <anonymous> (node:os:16:37)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/navigator/NavigatorConcurrentHardware-impl.js:6:15)
+      at hardwareConcurrency (/Users/kiran/Desktop/Projects/RxHtml/node_modules/jsdom/lib/jsdom/living/generated/Navigator.js:294:22)
+      at <anonymous> (node:os:16:37)
+-------------------------------
+
+
+46 tests failed:
+(fail) FPSMonitor > should limit frame history to 60 frames [3.61ms]
+(fail) DevTools Panel > should create panel with correct structure [6.88ms]
+(fail) DevTools Panel > should register and display signals [6.77ms]
+(fail) DevTools Panel > should switch between tabs [5.16ms]
+(fail) DevTools Panel > should close panel on close button click [5.60ms]
+(fail) DevTools Panel > should escape HTML in signal values [6.94ms]
+(fail) DevTools Panel > should handle object signal values [6.68ms]
+(fail) DevTools Panel > should display empty state when no signals registered [6.59ms]
+(fail) DevTools Panel > should display empty state when no components registered [5.20ms]
+(fail) DevTools Panel > should not initialize twice [4.75ms]
+(fail) DevTools Panel > should handle keyboard shortcut [7.60ms]
+(fail) Component System > Template compilation > should handle method calls in templates [0.73ms]
+(fail) Framework Integration Tests > Store + Component Integration > should connect components to store state [2.81ms]
+(fail) Framework Integration Tests > Full App Integration > should create complete app with routing and state [2.43ms]
+(fail) Framework Integration Tests > Complex State Updates > should handle batched updates across systems [1.35ms]
+(fail) State Store System > Middleware > should apply logging middleware [0.97ms]
+(fail) State Store System > Middleware > should apply persistence middleware [0.61ms]
+(fail) State Store System > Middleware > should restore state from localStorage [0.11ms]
+(fail) State Store System > DevTools middleware > should connect to devtools when available [0.09ms]
+(fail) HTMX and RxJS Integration > should emit signals on HTMX events [0.27ms]
+(fail) HTMX and RxJS Integration > should bind signal to DOM and update element [0.35ms]
+(fail) createStream > should warn if the element does not exist [2.19ms]
+(fail) Router System > Router creation > should create router instance [1.67ms]
+(fail) Router System > Router creation > should support hash mode
+(fail) Router System > Route matching > should match exact routes [0.25ms]
+(fail) Router System > Route matching > should match parameterized routes [0.13ms]
+(fail) Router System > Route matching > should parse query parameters
+(fail) Router System > Route matching > should return null for non-matching routes
+(fail) Router System > Navigation > should navigate to route [0.35ms]
+(fail) Router System > Navigation > should support push navigation
+(fail) Router System > Navigation > should support replace navigation
+(fail) Router System > Navigation > should support back navigation
+(fail) Router System > Route guards > should run before guards
+(fail) Router System > Route guards > should block navigation when guard returns false [0.42ms]
+(fail) Router System > Route guards > should support route-specific guards
+(fail) Router System > Route guards > should run after hooks
+(fail) Router System > Auth guard > should allow access when authenticated
+(fail) Router System > Auth guard > should redirect when not authenticated
+(fail) Router System > Auth guard > should allow access for non-protected routes [0.54ms]
+(fail) Router System > Router mounting > should mount router to container
+(fail) Router System > Router mounting > should mount current route component when mounted [0.19ms]
+(fail) Router System > Hash mode > should handle hash changes
+(fail) Router System > Composables > useRouter should return current router [0.12ms]
+(fail) Router System > Composables > useRoute should return current route signal
+
+ 85 pass
+ 46 fail
+ 2 errors
+ 181 expect() calls
+Ran 131 tests across 15 files. [1051.00ms]

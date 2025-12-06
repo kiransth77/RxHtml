@@ -41,7 +41,7 @@ describe('createStream', () => {
     createStream('#non-existent-element');
 
     expect(warnMock.calls).toContain(
-      'Element not found for selector: #non-existent-element'
+      '[RxHtmx] Element not found for selector: #non-existent-element'
     );
   });
 });

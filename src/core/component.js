@@ -125,31 +125,74 @@ export class Component {
   }
 
   compileTemplate(template) {
-    // Simple template compilation (in a real implementation, this would be more sophisticated)
     return () => {
-      let html = template;
-
-      // Replace {{expression}} with values
-      html = html.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
-        try {
-          const value = this.evaluateExpression(expression.trim());
-          return String(value);
-        } catch (e) {
-          console.warn(`Error evaluating expression: ${expression}`, e);
-          return match;
-        }
-      });
-
-      // Create DOM element from HTML
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = html;
+      wrapper.innerHTML = template;
+
+      // Process v-for first (structural)
+      this.processVFor(wrapper);
+
+      // Process text interpolation
+      this.processInterpolation(wrapper);
+
       const element = wrapper.firstElementChild;
 
       // Handle event directives like @click
-      this.bindEventDirectives(element);
+      if (element) {
+        this.bindEventDirectives(element);
+      }
 
       return element;
     };
+  }
+
+  processVFor(root) {
+    const elements = root.querySelectorAll('[v-for]');
+    elements.forEach(el => {
+      const vFor = el.getAttribute('v-for');
+      const [itemVar, itemsExpr] = vFor.split(' in ').map(s => s.trim());
+      
+      const items = this.evaluateExpression(itemsExpr);
+      
+      if (Array.isArray(items)) {
+        const parent = el.parentNode;
+        const anchor = el;
+        
+        items.forEach(item => {
+          const clone = el.cloneNode(true);
+          clone.removeAttribute('v-for');
+          clone._localContext = { [itemVar]: item };
+          parent.insertBefore(clone, anchor);
+        });
+        
+        parent.removeChild(anchor);
+      }
+    });
+  }
+
+  processInterpolation(root) {
+    // NodeFilter.SHOW_TEXT === 4
+    const walker = document.createTreeWalker(root, 4);
+    let node;
+    while (node = walker.nextNode()) {
+      const text = node.textContent;
+      if (text.includes('{{')) {
+        let context = {};
+        let parent = node.parentElement;
+        while (parent) {
+          if (parent._localContext) {
+            context = { ...context, ...parent._localContext };
+          }
+          parent = parent.parentElement;
+        }
+        
+        const newText = text.replace(/\{\{([^}]+)\}\}/g, (match, expr) => {
+          return this.evaluateExpression(expr.trim(), context);
+        });
+        
+        node.textContent = newText;
+      }
+    }
   }
 
   bindEventDirectives(element) {
@@ -224,49 +267,24 @@ export class Component {
     });
   }
 
-  evaluateExpression(expression) {
-    // Simple expression evaluation (would be more robust in real implementation)
-    const context = { ...this.setupResult, ...this.props };
+  evaluateExpression(expression, extraContext = {}) {
+    const context = { ...this.setupResult, ...this.props, ...extraContext };
+    
+    // Unwrap signals in context
+    const unwrappedContext = {};
+    for (const [key, value] of Object.entries(context)) {
+      unwrappedContext[key] = isSignal(value) ? value.value : value;
+    }
 
     try {
-      // Handle nested property access (e.g., route.params.id)
-      const parts = expression.split('.');
-      let value = context;
-
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (value && typeof value === 'object' && part in value) {
-          value = value[part];
-
-          // Unwrap signals for intermediate steps in property access
-          // but be careful to let the final access be tracked by effects
-          if (isSignal(value) && i < parts.length - 1) {
-            value = value.value;
-          }
-        } else {
-          // If property doesn't exist, return the original expression
-          return expression;
-        }
-      }
-
-      // Final unwrapping: if the final value is a signal, access its value
-      // This ensures the access is tracked by any active effect
-      if (isSignal(value)) {
-        const result = value.value;
-        return result;
-      }
-
-      return value;
+      const keys = Object.keys(unwrappedContext);
+      const values = Object.values(unwrappedContext);
+      // Use new Function for expression evaluation
+      const fn = new Function(...keys, `return ${expression}`);
+      return fn(...values);
     } catch (e) {
-      // Handle method calls
-      if (expression.includes('(') && expression.includes(')')) {
-        const methodName = expression.split('(')[0];
-        if (context[methodName] && typeof context[methodName] === 'function') {
-          return context[methodName]();
-        }
-      }
-
-      return expression;
+      console.warn(`Error evaluating expression: ${expression}`, e);
+      return '';
     }
   }
 

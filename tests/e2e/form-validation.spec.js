@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
 test.describe('RxHtmx Form Validation Example', () => {
   test.beforeEach(async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe('RxHtmx Form Validation Example', () => {
     // Test valid username
     await usernameInput.fill('validuser');
     await usernameInput.blur();
-    await expect(usernameValidation).toContainText('✓ Username looks good');
+    await expect(usernameValidation).toContainText('Username is available');
   });
 
   test('should validate email field', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('RxHtmx Form Validation Example', () => {
     // Test valid email
     await emailInput.fill('user@example.com');
     await emailInput.blur();
-    await expect(emailValidation).toContainText('✓ Email looks good');
+    await expect(emailValidation).toContainText('Email is available');
   });
 
   test('should validate password matching', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('RxHtmx Form Validation Example', () => {
     // Test matching passwords
     await confirmPasswordInput.fill('password123');
     await confirmPasswordInput.blur();
-    await expect(confirmValidation).toContainText('✓ Passwords match');
+    await expect(confirmValidation).toContainText('Passwords match');
   });
 
   test('should enable submit button when form is valid', async ({ page }) => {
@@ -78,8 +78,17 @@ test.describe('RxHtmx Form Validation Example', () => {
     // Fill all fields with valid data
     await page.locator('#username').fill('validuser');
     await page.locator('#email').fill('user@example.com');
-    await page.locator('#password').fill('password123');
-    await page.locator('#confirm-password').fill('password123');
+    await page.locator('#password').fill('Password123');
+    await page.locator('#confirm-password').fill('Password123');
+
+    // Wait for async validation to complete
+    await expect(page.locator('#username-validation')).toContainText('Username is available');
+    await expect(page.locator('#email-validation')).toContainText('Email is available');
+    await expect(page.locator('#password-validation')).toContainText('Password is strong');
+    await expect(page.locator('#confirm-password-validation')).toContainText('Passwords match');
+
+    // Wait for form status to update
+    await expect(page.locator('#form-status')).toContainText('Form is ready to submit!');
 
     // Submit button should be enabled
     await expect(submitBtn).toBeEnabled();

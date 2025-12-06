@@ -2,13 +2,14 @@
  * DevTools Panel Integration Tests
  */
 
+import './setup.js'; // Load global test environment
+
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { JSDOM } from 'jsdom';
 import { signal } from '../src/core/signal.js';
 
 describe('DevTools Panel', () => {
   let dom;
-  let document;
   let devtools;
 
   beforeEach(async () => {
@@ -32,6 +33,15 @@ describe('DevTools Panel', () => {
     // Dynamically import devtools to get fresh instance
     const module = await import('../src/devtools/panel.js');
     devtools = module.devtools;
+    
+    // Reset state
+    devtools.signals.clear();
+    devtools.components.clear();
+    devtools.enabled = false;
+    if (devtools.panel) {
+      devtools.panel.remove();
+      devtools.panel = null;
+    }
   });
 
   afterEach(() => {

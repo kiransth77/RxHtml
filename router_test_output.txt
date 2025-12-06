@@ -1,0 +1,233 @@
+bun test v1.3.3 (274e01c7)
+
+tests/router.test.js:
+Test setup complete - HTMX mocked globally
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Router creation > should create router instance [6.35ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Router initialization started
+Handling initial route
+Handling route: /
+No route found for path: /
+Router initialization completed
+(pass) Router System > Router creation > should support hash mode [0.70ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Route matching > should match exact routes [0.63ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Route matching > should match parameterized routes [0.45ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Route matching > should parse query parameters [0.35ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Route matching > should return null for non-matching routes [0.43ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Route updated to: /about
+Running after hooks
+(pass) Router System > Navigation > should navigate to route [0.47ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Route updated to: /about
+Running after hooks
+(pass) Router System > Navigation > should support push navigation [0.72ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Route updated to: /about
+Running after hooks
+(pass) Router System > Navigation > should support replace navigation [0.39ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Navigation > should support back navigation [0.54ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Route updated to: /about
+Running after hooks
+(pass) Router System > Route guards > should run before guards [0.33ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Navigation cancelled by before guards
+(pass) Router System > Route guards > should block navigation when guard returns false [0.26ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Router initialization started
+Handling initial route
+Handling route: /
+No route found for path: /
+Router initialization completed
+Handling route: /protected
+Running before guards
+Route updated to: /protected
+Running after hooks
+(pass) Router System > Route guards > should support route-specific guards [0.33ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /about
+Running before guards
+Route updated to: /about
+Running after hooks
+(pass) Router System > Route guards > should run after hooks
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Auth guard > should allow access when authenticated [1.20ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Auth guard > should redirect when not authenticated [0.53ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Auth guard > should allow access for non-protected routes [0.47ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Router mounting > should mount router to container [4.75ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Handling route: /
+Running before guards
+Route updated to: /
+Running after hooks
+(pass) Router System > Router mounting > should mount current route component when mounted [0.63ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Hash mode > should handle hash changes [0.69ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Composables > useRouter should return current router [0.77ms]
+Router initialization started
+Handling initial route
+Handling route: /
+Running before guards
+Router initialization completed
+Route updated to: /
+Running after hooks
+(pass) Router System > Composables > useRoute should return current route signal [0.39ms]
+
+ 22 pass
+ 0 fail
+ 31 expect() calls
+Ran 22 tests across 1 file. [301.00ms]

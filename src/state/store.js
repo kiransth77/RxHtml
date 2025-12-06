@@ -147,13 +147,16 @@ export class Store {
   }
 
   applyMiddleware() {
+    // Instantiate middleware
+    const middlewareInstances = this.middleware.map(m => m(this));
+
     // Create middleware chain
-    this.dispatch = this.middleware.reduceRight(
-      (next, middleware) => middleware(this)(next),
+    this.dispatch = middlewareInstances.reduceRight(
+      (next, middleware) => middleware(next),
       this.baseDispatch.bind(this)
     );
 
-    this.commit = this.middleware.reduceRight(
+    this.commit = middlewareInstances.reduceRight(
       (next, middleware) =>
         middleware.commit ? middleware.commit(this)(next) : next,
       this.baseCommit.bind(this)
@@ -329,25 +332,15 @@ export function devtools(options = {}) {
   const { name = 'RxHtmx Store' } = options;
 
   return store => {
-    // Initialize devtools connection lazily
+    // Initialize devtools connection immediately
     let devtoolsInstance = null;
-    let initialized = false;
-
-    const initDevtools = () => {
-      if (initialized || typeof window === 'undefined' || !window.__REDUX_DEVTOOLS_EXTENSION__) {
-        return;
-      }
-      initialized = true;
+    
+    if (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__) {
       devtoolsInstance = window.__REDUX_DEVTOOLS_EXTENSION__.connect({ name });
       devtoolsInstance.init(store.getState ? store.getState() : {});
-    };
+    }
 
     return next => (action, payload) => {
-      // Initialize on first dispatch
-      if (!initialized) {
-        initDevtools();
-      }
-
       const result = next(action, payload);
 
       if (devtoolsInstance) {

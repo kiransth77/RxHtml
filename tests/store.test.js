@@ -200,6 +200,10 @@ describe('State Store System', () => {
   });
 
   describe('Middleware', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
     test('should apply logging middleware', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
@@ -215,51 +219,49 @@ describe('State Store System', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Mutation increment:'),
-        expect.anything()
+        undefined
       );
 
       consoleSpy.mockRestore();
     });
 
     test('should apply persistence middleware', () => {
-      const setItemSpy = jest
-        .spyOn(localStorage, 'setItem')
-        .mockImplementation();
+      const mockStorage = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+      };
 
       const store = createStore({
         state: { count: 0 },
         mutations: {
           increment: state => state.count++,
         },
-        middleware: [persistenceMiddleware('test-store')],
+        middleware: [persistenceMiddleware({ key: 'test-store', storage: mockStorage })],
       });
 
       store.commit('increment');
 
-      expect(setItemSpy).toHaveBeenCalledWith(
+      expect(mockStorage.setItem).toHaveBeenCalledWith(
         'test-store',
         JSON.stringify({ count: 1 })
       );
-
-      setItemSpy.mockRestore();
     });
 
     test('should restore state from localStorage', () => {
-      const getItemSpy = jest
-        .spyOn(localStorage, 'getItem')
-        .mockReturnValue(JSON.stringify({ count: 5 }));
+      const mockStorage = {
+        getItem: jest.fn().mockReturnValue(JSON.stringify({ count: 5 })),
+        setItem: jest.fn(),
+      };
 
       const store = createStore({
         state: { count: 0 },
         mutations: {
           increment: state => state.count++,
         },
-        middleware: [persistenceMiddleware('test-store')],
+        middleware: [persistenceMiddleware({ key: 'test-store', storage: mockStorage })],
       });
 
       expect(store.state.count).toBe(5);
-
-      getItemSpy.mockRestore();
     });
 
     test('should apply custom middleware', () => {

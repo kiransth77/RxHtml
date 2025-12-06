@@ -1,6 +1,8 @@
 // Tests for the component system
 // Tests component lifecycle, props, events, and rendering
 
+import './setup.js'; // Load global test environment
+
 import { JSDOM } from 'jsdom';
 
 // Set up DOM environment

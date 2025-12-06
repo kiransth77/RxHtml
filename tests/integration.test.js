@@ -1,6 +1,8 @@
 // Integration tests for the complete framework
 // Tests that all systems work together properly
 
+import './setup.js'; // Load global test environment
+
 import { JSDOM } from 'jsdom';
 
 // Set up comprehensive DOM environment
@@ -321,8 +323,8 @@ describe('Framework Integration Tests', () => {
           const toggleTodo = id => store.commit('toggleTodo', id);
 
           return {
-            todos: store.state.todos,
-            todoCount: store.getters.todoCount,
+            todos: computed(() => store.state.todos),
+            todoCount: computed(() => store.getters.todoCount),
             addTodo,
             toggleTodo,
           };
@@ -372,7 +374,7 @@ describe('Framework Integration Tests', () => {
         setup() {
           console.log('⚙️ Setting up Counter component');
           return {
-            counter: store.state.counter,
+            counter: computed(() => store.state.counter),
             increment: () => store.commit('increment'),
           };
         },
@@ -390,7 +392,7 @@ describe('Framework Integration Tests', () => {
         setup() {
           console.log('⚙️ Setting up Profile component');
           return {
-            user: store.state.user,
+            user: computed(() => store.state.user),
             login: async () => {
               console.log('🔐 Executing login action...');
               const result = await store.dispatch('login', {
@@ -517,7 +519,7 @@ describe('Framework Integration Tests', () => {
         name: 'BatchTest',
         setup() {
           const total = computed(
-            () => count1.value + count2.value + store.state.counter.value
+            () => count1.value + count2.value + store.state.counter
           );
 
           const batchUpdate = () => {
@@ -531,7 +533,7 @@ describe('Framework Integration Tests', () => {
           return {
             count1,
             count2,
-            storeCounter: store.state.counter,
+            storeCounter: computed(() => store.state.counter),
             total,
             batchUpdate,
           };

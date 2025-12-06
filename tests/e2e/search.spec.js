@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
 test.describe('RxHtmx Search Example', () => {
   test.beforeEach(async ({ page }) => {
@@ -8,7 +8,8 @@ test.describe('RxHtmx Search Example', () => {
   test('should load the search example', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('Search with Autocomplete');
     await expect(page.locator('#search-input')).toBeVisible();
-    await expect(page.locator('#search-results')).toBeVisible();
+    // The results container is initially empty and might be considered hidden
+    await expect(page.locator('#search-results')).toBeAttached();
   });
 
   test('should show search suggestions', async ({ page }) => {
@@ -18,8 +19,9 @@ test.describe('RxHtmx Search Example', () => {
     // Type a search term
     await searchInput.fill('java');
 
-    // Wait for suggestions to appear (debounced)
-    await page.waitForTimeout(500);
+    // Wait for suggestions to appear (debounced + network delay)
+    // Debounce: 300ms, API: 300ms -> Total > 600ms
+    await page.waitForTimeout(1000);
 
     // Check if results are shown
     await expect(searchResults).not.toBeEmpty();
@@ -30,11 +32,14 @@ test.describe('RxHtmx Search Example', () => {
 
     // Search for specific term
     await searchInput.fill('react');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // All visible results should contain the search term
-    const results = page.locator('.search-suggestion');
+    // Note: The example renders results in #search-results with class .result-item
+    const results = page.locator('.result-item');
     const count = await results.count();
+    
+    expect(count).toBeGreaterThan(0);
 
     for (let i = 0; i < count; i++) {
       const result = results.nth(i);

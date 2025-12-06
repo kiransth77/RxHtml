@@ -197,13 +197,17 @@ export class FPSMonitor {
     const delta = now - this.lastTime;
     this.lastTime = now;
 
-    this.frames.push(1000 / delta);
-    if (this.frames.length > 60) {
-      this.frames.shift();
-    }
+    this.addFrame(1000 / delta);
 
     if (typeof requestAnimationFrame !== 'undefined') {
       requestAnimationFrame(() => this.tick());
+    }
+  }
+
+  addFrame(fps) {
+    this.frames.push(fps);
+    if (this.frames.length > 60) {
+      this.frames.shift();
     }
   }
 

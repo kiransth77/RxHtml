@@ -12,6 +12,11 @@ global.CustomEvent = dom.window.CustomEvent;
 global.location = dom.window.location;
 global.history = dom.window.history;
 global.navigator = dom.window.navigator;
+// Mock hardwareConcurrency to prevent JSDOM/Bun stack overflow
+Object.defineProperty(global.navigator, 'hardwareConcurrency', {
+  get: () => 4,
+  configurable: true,
+});
 global.localStorage = dom.window.localStorage;
 global.sessionStorage = dom.window.sessionStorage;
 global.Storage = dom.window.Storage;
@@ -34,5 +39,14 @@ import mockHtmx from './mocks/htmx.js';
 // Set htmx globally
 global.htmx = mockHtmx;
 globalThis.htmx = mockHtmx;
+
+// Mock console.assert if not available
+if (typeof global.console !== 'undefined' && !global.console.assert) {
+  global.console.assert = (condition, message) => {
+    if (!condition) {
+      console.error(`Assertion failed: ${message}`);
+    }
+  };
+}
 
 console.log('Test setup complete - HTMX mocked globally');

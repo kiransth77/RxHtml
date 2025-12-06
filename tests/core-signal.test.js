@@ -1,6 +1,8 @@
 // Comprehensive tests for RxHtmx Framework core features
 // Tests the enhanced signal system with computed values and effects
 
+import './setup.js'; // Load global test environment
+
 import { JSDOM } from 'jsdom';
 
 // Set up DOM environment

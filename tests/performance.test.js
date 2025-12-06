@@ -217,7 +217,7 @@ describe('FPSMonitor', () => {
     const monitor = new FPSMonitor();
 
     for (let i = 0; i < 100; i++) {
-      monitor.frames.push(60);
+      monitor.addFrame(60);
     }
 
     expect(monitor.frames.length).toBeLessThanOrEqual(60);

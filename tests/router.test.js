@@ -1,6 +1,8 @@
 // Tests for the router system
 // Tests routing, navigation, guards, and history management
 
+import './setup.js'; // Load global test environment
+
 import { JSDOM } from 'jsdom';
 
 // Set up DOM environment with history API
@@ -20,6 +22,16 @@ global.CustomEvent = dom.window.CustomEvent;
 global.Event = dom.window.Event;
 global.history = dom.window.history;
 global.location = dom.window.location;
+global.localStorage = dom.window.localStorage;
+global.sessionStorage = dom.window.sessionStorage;
+
+// Ensure console is available
+if (!global.console) {
+  global.console = { log: () => {}, warn: () => {}, error: () => {} };
+}
+if (!global.console.log) {
+  global.console.log = () => {};
+}
 
 import {
   createRouter,

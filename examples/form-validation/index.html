@@ -58,6 +58,8 @@
         </div>
 
         <script type="module">
+            const { createStream, bindSignalToDom } = RxHtmx;
+
             // --- Minimal signal implementation (for demo, use src/signal.js in prod) ---
             function signal(initialValue) {
                 let _value = initialValue;

@@ -1,6 +1,6 @@
 import './mocks/htmx.js';
 import { JSDOM } from 'jsdom';
-import { integrateHtmxWithSignals } from '../src/index.js';
+import { integrateHtmxWithSignals, bindSignalToDom } from '../src/index.js';
 import { Subject } from 'rxjs';
 
 // Set up a DOM environment for HTMX
@@ -27,6 +27,7 @@ describe('HTMX and RxJS Integration', () => {
     });
 
     htmxSignal.subscribe(event => {
+      if (!event) return; // Ignore initial null value
       try {
         expect(event.type).toBe('afterSwap');
         expect(event.detail.message).toBe('HTMX swap occurred');

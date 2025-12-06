@@ -63,10 +63,9 @@ export default defineConfig(({ mode }) => ({
 
     // Rollup options
     rollupOptions: {
-      external: ['rxjs', 'htmx.org'],
+      external: ['htmx.org'],
       output: {
         globals: {
-          rxjs: 'rxjs',
           'htmx.org': 'htmx',
         },
         // Preserve module structure
@@ -74,7 +73,6 @@ export default defineConfig(({ mode }) => ({
         // Asset file names
         assetFileNames: 'assets/[name].[hash][extname]',
         chunkFileNames: 'chunks/[name].[hash].js',
-        entryFileNames: '[name].js',
       },
     },
 

@@ -1,5 +1,5 @@
 {
-  "name": "@kiransth77/rxhtmx",
+  "name": "@kiransth/rxhtmx",
   "version": "2.0.0",
   "type": "module",
   "description": "A comprehensive reactive frontend framework with components, routing, state management, and RxJS integration.",
